@@ -7,6 +7,8 @@ step, no runtime dependencies, no framework — the entire app is one `index.htm
 
 **Live demo:** https://alfredang.github.io/kacificlogistics/
 
+![The LogiTrack Inventory dashboard: summary stat cards across the top, a sortable stock table with derived In Stock / Low Stock badges, and the add-record form in a side panel](docs/screenshot.png)
+
 ## The data is placeholder seed data
 
 `inventory.csv` holds 30 **fictional** records — invented SKUs, suppliers and
