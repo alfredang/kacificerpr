@@ -1,0 +1,26 @@
+# Secrets — never commit
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+.netrc
+.npmrc
+.pypirc
+credentials
+secrets.*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.bak
+*.tmp
+~$*
+
+# Local Claude Code state (project commands are tracked)
+.claude/settings.local.json
