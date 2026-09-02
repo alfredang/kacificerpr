@@ -1,15 +1,15 @@
 SKU,Product Name,Category,Warehouse,Quantity,Reorder Level,Unit Cost (USD),Supplier,Status,Last Updated
 RM-1001,Cold-Rolled Steel Coil 1.2mm,Raw Materials,Singapore Hub,1840,500,412.50,Sunrise Metals Pte Ltd,In Stock,2026-08-28
-RM-1014,Polypropylene Resin Pellets,Raw Materials,Johor DC,320,400,88.75,Petra Polymers Sdn Bhd,Low Stock,2026-08-30
-PK-2003,Corrugated Carton 600x400mm,Packaging,Johor DC,12500,3000,0.94,BoxWorks Packaging,In Stock,2026-08-31
-PK-2018,Stretch Wrap Film 500mm,Packaging,Jakarta Depot,0,250,14.20,Nusantara Wrap Indo,Out of Stock,2026-08-22
+RM-1014,Polypropylene Resin Pellets,Raw Materials,Morehead,320,400,88.75,Petra Polymers Sdn Bhd,Low Stock,2026-08-30
+PK-2003,Corrugated Carton 600x400mm,Packaging,Morehead,12500,3000,0.94,BoxWorks Packaging,In Stock,2026-08-31
+PK-2018,Stretch Wrap Film 500mm,Packaging,Daru,0,250,14.20,Nusantara Wrap Indo,Out of Stock,2026-08-22
 PK-2027,Thermal Shipping Labels 4x6,Packaging,Singapore Hub,7400,2000,0.06,LabelPro Asia,In Stock,2026-09-01
 EL-3006,GPS Asset Tracker Module v3,Electronics,Singapore Hub,615,200,64.90,Meridian Electronics Ltd,In Stock,2026-08-29
-EL-3011,Cold-Chain Temp Sensor Probe,Electronics,Bangkok Cross-dock,148,150,37.40,ThaiSense Instruments,Low Stock,2026-08-25
-EL-3029,Handheld Barcode Scanner HS7,Electronics,Johor DC,92,40,289.00,Meridian Electronics Ltd,In Stock,2026-08-18
-FG-4002,Water Filtration Unit A2,Finished Goods,Jakarta Depot,2310,800,156.75,Clearflow Manufacturing,In Stock,2026-08-27
+EL-3011,Cold-Chain Temp Sensor Probe,Electronics,POM,148,150,37.40,ThaiSense Instruments,Low Stock,2026-08-25
+EL-3029,Handheld Barcode Scanner HS7,Electronics,Morehead,92,40,289.00,Meridian Electronics Ltd,In Stock,2026-08-18
+FG-4002,Water Filtration Unit A2,Finished Goods,Daru,2310,800,156.75,Clearflow Manufacturing,In Stock,2026-08-27
 FG-4015,Solar Charge Controller 30A,Finished Goods,Singapore Hub,430,500,98.20,Helios Power Systems,Low Stock,2026-08-30
-FG-4021,Portable Cooler Box 45L,Finished Goods,Bangkok Cross-dock,1175,300,72.40,Clearflow Manufacturing,In Stock,2026-08-26
-SP-5004,Forklift Hydraulic Seal Kit,Spare Parts,Johor DC,76,25,143.60,Apex Industrial Spares,In Stock,2026-08-19
-SP-5012,Conveyor Belt Roller 80mm,Spare Parts,Jakarta Depot,210,60,46.85,Apex Industrial Spares,In Stock,2026-08-31
-SP-5023,Pallet Jack Load Wheel Pair,Spare Parts,Bangkok Cross-dock,18,30,29.95,Siam Handling Equipment,Low Stock,2026-08-24
+FG-4021,Portable Cooler Box 45L,Finished Goods,POM,1175,300,72.40,Clearflow Manufacturing,In Stock,2026-08-26
+SP-5004,Forklift Hydraulic Seal Kit,Spare Parts,Morehead,76,25,143.60,Apex Industrial Spares,In Stock,2026-08-19
+SP-5012,Conveyor Belt Roller 80mm,Spare Parts,Daru,210,60,46.85,Apex Industrial Spares,In Stock,2026-08-31
+SP-5023,Pallet Jack Load Wheel Pair,Spare Parts,POM,18,30,29.95,Siam Handling Equipment,Low Stock,2026-08-24

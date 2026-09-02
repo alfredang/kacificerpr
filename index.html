@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LogiTrack Inventory</title>
+<title>KTower Inventory</title>
 <style>
 /* ==========================================================================
-   1. DESIGN TOKENS — Kacific Broadband Satellites brand system
-   Core blue, supporting blues and neutrals come from the brand palette. The
+   1. DESIGN TOKENS — K-Tower PNG house style
+   Core blue, supporting blues and neutrals come from the house palette. The
    green/amber/red status colours further down are SEMANTIC, not brand, and
    are deliberately left alone.
    ========================================================================== */
@@ -132,16 +132,33 @@ p { margin: 0; }
 
 .brand { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 
-/* The reversed (white) lockup, embedded as a data URI so the page stays a
-   single offline file. Never recoloured, stretched or rebuilt from live text;
-   the width is left auto so the file's own 350x126 ratio is preserved. */
+/* The K-Tower PNG lockup: tower mark plus wordmark, drawn inline rather than
+   linked, so the page stays a single offline file. */
 .brand__logo {
-  height: 44px;
-  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex: 0 0 auto;
-  /* Brand rule: clear space of at least the height of the "K" on all sides. */
+  /* Clear space of at least the mark's own height is kept on all sides. */
   margin: 6px 6px 6px 0;
 }
+
+.brand__mark {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+}
+
+.brand__word {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+/* The locality suffix sits lighter, so "K-Tower" carries the name. */
+.brand__word span { font-weight: 300; color: var(--k-blue-pale); margin-left: 5px; }
 
 .brand__text {
   padding-left: 18px;
@@ -542,12 +559,26 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 <header class="topbar">
   <div class="topbar__inner">
     <div class="brand">
-      <!-- Kacific reversed lockup, embedded so the page stays one offline file. -->
-      <img class="brand__logo" alt="Kacific Broadband Satellites"
-           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKwAAABCBAMAAAA4USAZAAAAMFBMVEVHcEz///////////////////////////////////////////////////////////9EPuwCAAAAD3RSTlMAYN8fQKYQgJFwv+8wUM8djoSWAAAFkUlEQVRYw61YX2xTVRw+47a37bZKl21sGJKNyeaL2S6bkiBGSjaiqGS3Gygi0jLngAS1/mcYXBODqyaEEgaG8LAa48t8oKj4wEs7NYs+GPaw+Arii28N3ZCx4q7n9zvn3nO6dd3a21+yu3PPPfc753zn+33n3BKSN0407L+TNIz2b0/7Sdni9z5DxD9/lgf0+GtGbnwdsg+qnjKWxT3N9lCvcqgbr27aRu+f2fNl0j7u0SQntFbUVdcnbeLuZqDXN+RWe4PGZhuoTyNodt+yJVLeM14uGfUYoi5cyvNIGcmUSoMHeV3Ir38l+FhpqI50AVTaaYnDHSmISkhnWymozwJqZnrlBkprCaheJPbzQk06YyVSsKVgE6V4FpyY+qtYSkPR/oJOsNokncU62duA+uNqrZQiyVVBsmvQZZE7RSUMdg1Z9EZxsOfWNliiFIXqWuNgi4xecEOt3KhKB4X9j5HXBYGVULC1NWIqhLE4jlkB2giC79iaQRNFWGRFzIoHkP9QiNgiATj4gRXRbx5S701y+NLDJThw4K6TYMaTtXdMgvlm+A6AsDp5U1ac+mlLwCw29rXQaCduem0l6sUWFvoAvaD97TmMFW2M2rtSthkxJS3b2biYzHf8kEPW0et9tgC4CLfoZZbK5xNecZtR28wQqrAu9aKghXP0EDVnHngekJv0OkeCJuz0OYRSrIoI8cI/n8gLI4tUXDM5umWKg1yhhUANjVrywsTEhA4LvDjTQyN0kN7HsMHj0KBGQ9VmQ2K+xgI6RErOFZSya6l3VltZJOY1b95U8bcs2WJ8I3IlC/3ybck0XBiiVsEIhb7hHhs0y4Zg9pm0Tp7SHrcZKjRSIQTDhJhyWjBQWoAGhiVKmPi/UmuMRVMGimFMMfLXSb15sAuo+QuY3IDCkIRKI8j0IGTLtctigOoojfe9uPhCiPfITrNxAkpzTTmzvCpAKgXsfcvg42jyzXhN8Nr1KPUms3EcSomg1C+TbViWbYchduEK2DSakCZ4Ky6txyzWYE758FlasElD2slRtpkdhpUANI9o/u3EsQUlS2PjpzgLYqljHbIQiJQNzG3ZwrHdosPo7+rqRD2OSJmHxKmWyVWjMIIrwaJs7zJ0o81MXCYNHDMnQcWE9VpcelDZMNef8nGLALPEzQ7lJissQm7hwJjvmttaQyYMEO+8tU2lLc7Y7JvNZIvwxOVugoR+Dyvkd+PwK63hV+EkcZ/KQIMnuG7jwqtAbAPcp5xch0nsxGXmYOgRJPsda5q9bIk95igSfJ0SkmwpzwoD8I9zK+c9b09LNM8hmN86xMJibeWeAqO8aTHv6EGTo6VJdLfpmhrmY3ALq6ruheo6cgQSFmsZj7ugMa7lr/hiihMzX/YTDTKaDZUdVl3LgbmECHLtlzl2SIZVxvDkuPoKxzT2z5f72ZkiurjTw9ZqCSsoeLpVp5fCOtA1SUHYTnmXyfspeKjyTFilE4r6FD95UhvyH6W2lXL6SfTU0CA9+g+mXKP6gWH6KPQLOfkh368gqf4u9JH9mZNEGp8PkVjs9G61e6yh+zghgWE62kOOug+6okMXJo+ReNw11D3WuN2nV/LXfl7l00EJO4keqE8Rny9Qr208X0vnr4adFLZfqUt5Ff+uhq1E1yu2bTxfR/rDbvmIca0QrJvoEZVy64sQtzaJsBEXhd3n6NG8J/b6XHS0t530UR2JhJ3me0+BGPrzL9cU/QtQEn6Lhijsc8Pe4bO1xEPI5bNeSvYZh6aOVo9edh2IRD+mj2aIfjKa8yGd+Sgf6ku2vkrQgt9fVn+k215OONAqX1/S2VeX7OaaA8+m1zdJP4pefKUM32rKo+w3wC9m6HdZ1x+NfTculMcc3jos/VrZOlY+1xlsOHiHmnr7/nenbCL9D6zPsYhLaDJcAAAAAElFTkSuQmCC">
+      <!-- K-Tower PNG lockup. The mark is a lattice tower under two signal
+           arcs; the arcs carry the same curve language as the header orbits. -->
+      <div class="brand__logo">
+        <svg class="brand__mark" viewBox="0 0 44 44" aria-hidden="true" focusable="false"
+             fill="none" stroke="#fff" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 38 L20 10" />
+          <path d="M31 38 L24 10" />
+          <path d="M15.8 27 H28.2" />
+          <path d="M17.7 19.5 H26.3" />
+          <path d="M19.2 13.5 H24.8" />
+          <path d="M22 10 V5.5" />
+          <path d="M14.9 9.2 A 8 8 0 0 1 29.1 9.2" stroke-opacity=".85" />
+          <path d="M11.6 12.4 A 12.5 12.5 0 0 1 32.4 12.4" stroke-opacity=".55" />
+        </svg>
+        <span class="brand__word">K-Tower <span>PNG</span></span>
+      </div>
       <div class="brand__text">
-        <h1>LogiTrack Inventory</h1>
-        <p>Regional stock positions across the South-East Asia distribution network</p>
+        <h1>KTower Inventory</h1>
+        <p>Regional stock positions across the Papua New Guinea network and Singapore hub</p>
       </div>
     </div>
 
@@ -691,8 +722,8 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
      ========================================================================== -->
 <footer class="sitefoot">
   <div class="sitefoot__inner">
-    <p class="sitefoot__brand">Kacific Broadband Satellites Ltd &mdash; the heart of broadband.</p>
-    <p class="sitefoot__note">LogiTrack Inventory &middot; internal warehouse stock dashboard &middot; in-memory data, resets on reload</p>
+    <p class="sitefoot__brand">K-Tower PNG &mdash; warehouse operations, Papua New Guinea.</p>
+    <p class="sitefoot__note">KTower Inventory &middot; internal warehouse stock dashboard &middot; in-memory data, resets on reload</p>
   </div>
 </footer>
 
@@ -706,7 +737,7 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
    ========================================================================== */
 
 var CATEGORIES = ['Raw Materials', 'Packaging', 'Electronics', 'Finished Goods', 'Spare Parts'];
-var WAREHOUSES = ['Singapore Hub', 'Johor DC', 'Jakarta Depot', 'Bangkok Cross-dock'];
+var WAREHOUSES = ['Singapore Hub', 'Morehead', 'Daru', 'POM'];
 
 /* Column definitions drive both the <thead> markup and the sort logic, so the
    two can never drift apart. `type` tells the comparator how to compare. */
@@ -727,20 +758,20 @@ var COLUMNS = [
 /* Mock seed data. Deliberately includes rows at, below and at zero quantity so
    all three status colours are visible on first load. */
 var records = [
-  { id: 1,  sku: 'RM-1001', name: 'Cold-Rolled Steel Coil 1.2mm', category: 'Raw Materials',  warehouse: 'Singapore Hub',      qty: 1840, reorder: 500,  cost: 412.5,  supplier: 'Sunrise Metals Pte Ltd',    updated: '2026-08-28' },
-  { id: 2,  sku: 'RM-1014', name: 'Polypropylene Resin Pellets',  category: 'Raw Materials',  warehouse: 'Johor DC',           qty: 320,  reorder: 400,  cost: 88.75,  supplier: 'Petra Polymers Sdn Bhd',    updated: '2026-08-30' },
-  { id: 3,  sku: 'PK-2003', name: 'Corrugated Carton 600x400mm',  category: 'Packaging',      warehouse: 'Johor DC',           qty: 12500, reorder: 3000, cost: 0.94,   supplier: 'BoxWorks Packaging',        updated: '2026-08-31' },
-  { id: 4,  sku: 'PK-2018', name: 'Stretch Wrap Film 500mm',      category: 'Packaging',      warehouse: 'Jakarta Depot',      qty: 0,    reorder: 250,  cost: 14.2,   supplier: 'Nusantara Wrap Indo',       updated: '2026-08-22' },
-  { id: 5,  sku: 'PK-2027', name: 'Thermal Shipping Labels 4x6',  category: 'Packaging',      warehouse: 'Singapore Hub',      qty: 7400, reorder: 2000, cost: 0.06,   supplier: 'LabelPro Asia',             updated: '2026-09-01' },
-  { id: 6,  sku: 'EL-3006', name: 'GPS Asset Tracker Module v3',  category: 'Electronics',    warehouse: 'Singapore Hub',      qty: 615,  reorder: 200,  cost: 64.9,   supplier: 'Meridian Electronics Ltd',  updated: '2026-08-29' },
-  { id: 7,  sku: 'EL-3011', name: 'Cold-Chain Temp Sensor Probe', category: 'Electronics',    warehouse: 'Bangkok Cross-dock', qty: 148,  reorder: 150,  cost: 37.4,   supplier: 'ThaiSense Instruments',     updated: '2026-08-25' },
-  { id: 8,  sku: 'EL-3029', name: 'Handheld Barcode Scanner HS7', category: 'Electronics',    warehouse: 'Johor DC',           qty: 92,   reorder: 40,   cost: 289,    supplier: 'Meridian Electronics Ltd',  updated: '2026-08-18' },
-  { id: 9,  sku: 'FG-4002', name: 'Water Filtration Unit A2',     category: 'Finished Goods', warehouse: 'Jakarta Depot',      qty: 2310, reorder: 800,  cost: 156.75, supplier: 'Clearflow Manufacturing',   updated: '2026-08-27' },
-  { id: 10, sku: 'FG-4015', name: 'Solar Charge Controller 30A',  category: 'Finished Goods', warehouse: 'Singapore Hub',      qty: 430,  reorder: 500,  cost: 98.2,   supplier: 'Helios Power Systems',      updated: '2026-08-30' },
-  { id: 11, sku: 'FG-4021', name: 'Portable Cooler Box 45L',      category: 'Finished Goods', warehouse: 'Bangkok Cross-dock', qty: 1175, reorder: 300,  cost: 72.4,   supplier: 'Clearflow Manufacturing',   updated: '2026-08-26' },
-  { id: 12, sku: 'SP-5004', name: 'Forklift Hydraulic Seal Kit',  category: 'Spare Parts',    warehouse: 'Johor DC',           qty: 76,   reorder: 25,   cost: 143.6,  supplier: 'Apex Industrial Spares',    updated: '2026-08-19' },
-  { id: 13, sku: 'SP-5012', name: 'Conveyor Belt Roller 80mm',    category: 'Spare Parts',    warehouse: 'Jakarta Depot',      qty: 210,  reorder: 60,   cost: 46.85,  supplier: 'Apex Industrial Spares',    updated: '2026-08-31' },
-  { id: 14, sku: 'SP-5023', name: 'Pallet Jack Load Wheel Pair',  category: 'Spare Parts',    warehouse: 'Bangkok Cross-dock', qty: 18,   reorder: 30,   cost: 29.95,  supplier: 'Siam Handling Equipment',   updated: '2026-08-24' }
+  { id: 1,  sku: 'RM-1001', name: 'Cold-Rolled Steel Coil 1.2mm', category: 'Raw Materials',  warehouse: 'Singapore Hub', qty: 1840, reorder: 500,  cost: 412.5,  supplier: 'Sunrise Metals Pte Ltd',    updated: '2026-08-28' },
+  { id: 2,  sku: 'RM-1014', name: 'Polypropylene Resin Pellets',  category: 'Raw Materials',  warehouse: 'Morehead',      qty: 320,  reorder: 400,  cost: 88.75,  supplier: 'Petra Polymers Sdn Bhd',    updated: '2026-08-30' },
+  { id: 3,  sku: 'PK-2003', name: 'Corrugated Carton 600x400mm',  category: 'Packaging',      warehouse: 'Morehead',      qty: 12500, reorder: 3000, cost: 0.94,   supplier: 'BoxWorks Packaging',        updated: '2026-08-31' },
+  { id: 4,  sku: 'PK-2018', name: 'Stretch Wrap Film 500mm',      category: 'Packaging',      warehouse: 'Daru',          qty: 0,    reorder: 250,  cost: 14.2,   supplier: 'Nusantara Wrap Indo',       updated: '2026-08-22' },
+  { id: 5,  sku: 'PK-2027', name: 'Thermal Shipping Labels 4x6',  category: 'Packaging',      warehouse: 'Singapore Hub', qty: 7400, reorder: 2000, cost: 0.06,   supplier: 'LabelPro Asia',             updated: '2026-09-01' },
+  { id: 6,  sku: 'EL-3006', name: 'GPS Asset Tracker Module v3',  category: 'Electronics',    warehouse: 'Singapore Hub', qty: 615,  reorder: 200,  cost: 64.9,   supplier: 'Meridian Electronics Ltd',  updated: '2026-08-29' },
+  { id: 7,  sku: 'EL-3011', name: 'Cold-Chain Temp Sensor Probe', category: 'Electronics',    warehouse: 'POM',           qty: 148,  reorder: 150,  cost: 37.4,   supplier: 'ThaiSense Instruments',     updated: '2026-08-25' },
+  { id: 8,  sku: 'EL-3029', name: 'Handheld Barcode Scanner HS7', category: 'Electronics',    warehouse: 'Morehead',      qty: 92,   reorder: 40,   cost: 289,    supplier: 'Meridian Electronics Ltd',  updated: '2026-08-18' },
+  { id: 9,  sku: 'FG-4002', name: 'Water Filtration Unit A2',     category: 'Finished Goods', warehouse: 'Daru',          qty: 2310, reorder: 800,  cost: 156.75, supplier: 'Clearflow Manufacturing',   updated: '2026-08-27' },
+  { id: 10, sku: 'FG-4015', name: 'Solar Charge Controller 30A',  category: 'Finished Goods', warehouse: 'Singapore Hub', qty: 430,  reorder: 500,  cost: 98.2,   supplier: 'Helios Power Systems',      updated: '2026-08-30' },
+  { id: 11, sku: 'FG-4021', name: 'Portable Cooler Box 45L',      category: 'Finished Goods', warehouse: 'POM',           qty: 1175, reorder: 300,  cost: 72.4,   supplier: 'Clearflow Manufacturing',   updated: '2026-08-26' },
+  { id: 12, sku: 'SP-5004', name: 'Forklift Hydraulic Seal Kit',  category: 'Spare Parts',    warehouse: 'Morehead',      qty: 76,   reorder: 25,   cost: 143.6,  supplier: 'Apex Industrial Spares',    updated: '2026-08-19' },
+  { id: 13, sku: 'SP-5012', name: 'Conveyor Belt Roller 80mm',    category: 'Spare Parts',    warehouse: 'Daru',          qty: 210,  reorder: 60,   cost: 46.85,  supplier: 'Apex Industrial Spares',    updated: '2026-08-31' },
+  { id: 14, sku: 'SP-5023', name: 'Pallet Jack Load Wheel Pair',  category: 'Spare Parts',    warehouse: 'POM',           qty: 18,   reorder: 30,   cost: 29.95,  supplier: 'Siam Handling Equipment',   updated: '2026-08-24' }
 ];
 
 /* Monotonic counter for row identity. Independent of SKU so that deletes stay

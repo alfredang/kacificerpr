@@ -1,7 +1,7 @@
-# LogiTrack Inventory
+# KTower Inventory
 
 A single-file warehouse stock dashboard for tracking regional inventory positions across
-a South-East Asia distribution network. Search, filter, sort, add and delete SKU records,
+a Papua New Guinea distribution network. Search, filter, sort, add and delete SKU records,
 with stock status derived live from quantity against reorder level.
 
 The entire application is one file — [`index.html`](index.html). No build step, no
@@ -9,12 +9,12 @@ package manager, no dependencies, no network access. Open it and it runs.
 
 **[Live demo →](https://rajjosg530-max.github.io/logitrack-inventory/)**
 
-![The LogiTrack Inventory dashboard: a summary strip of headline totals above the
+![The KTower Inventory dashboard: a summary strip of headline totals above the
 inventory table and the add-record form](screenshot.png)
 
-Styled to the **Kacific Broadband Satellites** brand system — brand blue `#034EA2`,
-Montserrat, uppercase pill buttons and the orbital-curve motif. The logo is embedded as a
-`data:` URI and the type falls back to Segoe UI, so the file stays self-contained offline.
+Styled to the K-Tower PNG house system — brand blue `#034EA2`, Montserrat, uppercase
+pill buttons and a curve motif carried from the tower mark. The logo is drawn as inline
+SVG and the type falls back to Segoe UI, so the file stays self-contained offline.
 
 ## Run it
 
@@ -56,7 +56,7 @@ Status column uses severity order, not alphabetical.
 
 ## Seed data
 
-The app ships with 14 SKUs across 4 warehouses. It should render as:
+The app ships with 14 SKUs across 4 warehouses (Singapore Hub, Morehead, Daru, POM). It should render as:
 
 - **14** total SKUs
 - **27,134** total units

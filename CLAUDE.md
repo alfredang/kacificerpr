@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-LogiTrack Inventory — an internal warehouse stock dashboard. The entire application is
+KTower Inventory — an internal warehouse stock dashboard. The entire application is
 one file, `index.html` (~1,080 lines), that runs by opening it in a browser.
 `inventory.csv` is a static export of the seed data.
 
