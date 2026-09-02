@@ -7,6 +7,8 @@ with stock status derived live from quantity against reorder level.
 The entire application is one file — [`index.html`](index.html). No build step, no
 package manager, no dependencies, no network access. Open it and it runs.
 
+**[Live demo →](https://rajjosg530-max.github.io/logitrack-inventory/)**
+
 ## Run it
 
 ```powershell
