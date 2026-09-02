@@ -1,0 +1,118 @@
+/* Kacific Broadband Satellites — brand tokens
+   Extracted from kacific.com, September 2026. Light theme only; the brand has no dark variant.
+   Contrast ratings are against the stated background — see SKILL.md before using any of the
+   colours marked "decorative". */
+
+:root {
+  /* Core — from the logo artwork itself */
+  --k-blue: #034EA2;          /* AAA on white (8.03). The brand colour. */
+  --k-grey: #A7A9AC;          /* decorative only — 2.36 on white, fails for text */
+
+  /* Supporting blues */
+  --k-blue-mid: #358CCB;      /* 3.64 on white — large text / backgrounds only */
+  --k-blue-footer: #07529E;   /* AAA on white (7.75) */
+  --k-blue-bright: #0071BC;   /* AA on white (5.14) */
+  --k-blue-sky: #52A4CA;      /* decorative only — 2.79 on white */
+  --k-blue-pale: #C5D3E9;     /* AA on --k-blue (5.30) — body text on blue bands */
+
+  /* Neutrals */
+  --k-ink: #111111;           /* AAA on white (18.88) — body copy */
+  --k-muted: #929292;         /* large text on white only; too light on --k-tint */
+  --k-muted-safe: #6B6B6B;    /* accessible substitute for --k-muted on tinted grounds */
+  --k-tint: #F1F4FA;          /* alternating section wash */
+  --k-surface: #FFFFFF;
+
+  /* Type */
+  --k-font: 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --k-lh-heading: 1.1;
+  --k-lh-body: 1.5;
+
+  /* Shape */
+  --k-radius-pill: 38px;
+  --k-radius-card: 6px;
+  --k-radius-input: 4px;
+  --k-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* Base ------------------------------------------------------------------ */
+
+body {
+  background: var(--k-surface);
+  color: var(--k-ink);
+  font-family: var(--k-font);
+  font-weight: 400;
+  line-height: var(--k-lh-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--k-font);
+  line-height: var(--k-lh-heading);
+  color: var(--k-blue);
+}
+
+h1 { font-size: clamp(1.75rem, 2.4vw, 2.75rem); font-weight: 600; }
+h2 { font-size: clamp(1.35rem, 1.9vw, 2rem);    font-weight: 600; }
+h3 { font-size: clamp(1.1rem, 1.4vw, 1.4rem);   font-weight: 500; }
+
+/* Links use the AAA blue, not the site's failing --k-blue-mid. */
+a { color: var(--k-blue); }
+
+/* Components ------------------------------------------------------------ */
+
+.k-btn {
+  background: var(--k-surface);
+  color: var(--k-blue);
+  border: 0;
+  border-radius: var(--k-radius-pill);
+  padding: 14px 31px 10px;          /* bottom-lifted to optically centre uppercase text */
+  font: 500 0.75rem/1 var(--k-font);
+  text-transform: uppercase;
+  box-shadow: var(--k-shadow);
+  cursor: pointer;
+}
+
+.k-btn--primary {
+  background: var(--k-blue);
+  color: var(--k-surface);
+}
+
+.k-btn--outline {
+  background: transparent;
+  border: 1px solid var(--k-blue-mid);
+  color: var(--k-blue);
+  border-radius: var(--k-radius-input);
+  padding: 8px 20px 6px;
+  box-shadow: none;
+  transition: background 0.3s ease-out, color 0.3s ease-out;
+}
+
+.k-btn--outline:hover {
+  background: var(--k-blue-mid);
+  color: var(--k-surface);
+}
+
+/* Full-bleed section bands, alternating white / tint / blue. */
+.k-band--tint { background: var(--k-tint); }
+
+.k-band--blue {
+  background: var(--k-blue);
+  color: var(--k-surface);
+}
+
+.k-band--blue h1,
+.k-band--blue h2,
+.k-band--blue h3 { color: var(--k-surface); }
+
+.k-band--blue p { color: var(--k-blue-pale); }
+
+.k-card {
+  background: var(--k-surface);
+  border-radius: var(--k-radius-card);
+  box-shadow: var(--k-shadow);
+}
+
+/* Visible focus ring, in brand blue. */
+:focus-visible {
+  outline: 2px solid var(--k-blue);
+  outline-offset: 2px;
+}

@@ -15,7 +15,7 @@ repository the user did not name.
 
 Defaults when unspecified: visibility **private**, branch **main**, Pages **enabled**
 (Pages requires a public repo on GitHub Free — if the user picked private, say so and
-either ask them to make it public or skip step 5).
+either ask them to make it public or skip step 7).
 
 Work through the steps in order. **Step 2 is a hard gate: nothing is pushed until the
 secret scan is clean and the user has approved the file list.** Scanning after upload
@@ -184,7 +184,92 @@ git push -u origin main
 If the push is rejected because the remote has commits, **do not force-push.** Report it
 and ask whether to pull and rebase or use a different repo.
 
-## Step 4 — README
+## Step 4 — Screenshot for the README
+
+A README for a UI project should show the UI. Capture it with the **Playwright MCP
+server** declared in `.mcp.json` (project scope). If the `mcp__playwright__*` tools are
+not available the server failed to connect — say so and go on to step 5 with no image,
+rather than committing a README with a broken `![...](screenshot.png)` link.
+
+### 4a. Serve the page over HTTP
+
+The Playwright MCP sandbox **blocks the `file:` protocol** — `file:///.../index.html`
+fails with "Access to file: protocol is blocked". Serve the folder instead. Node is
+already required for the MCP server, so a throwaway static server costs nothing. Run it
+in the background and stop it in 4e:
+
+```powershell
+node -e "const h=require('http'),f=require('fs'),p=require('path');const r=p.resolve('.');h.createServer((q,s)=>{const u=decodeURIComponent(q.url.split('?')[0]);const t=p.join(r,u==='/'?'index.html':u);if(!t.startsWith(r)){s.writeHead(403).end();return}f.readFile(t,(e,b)=>e?s.writeHead(404).end():(s.writeHead(200,{'Content-Type':t.endsWith('.html')?'text/html':'application/octet-stream'}),s.end(b)))}).listen(8765,()=>console.log('http://localhost:8765'))"
+```
+
+`path.resolve` is not optional there: on Windows `path.join` returns backslashes, so
+comparing against a forward-slash root makes every request 403 and Playwright reports
+only a bare `ERR_HTTP_RESPONSE_CODE_FAILURE`.
+
+### 4b. Unclip the layout before shooting
+
+The table is deliberately clipped at real viewport sizes — `.table-wrap` is
+`overflow:auto; max-height:62vh` and `.layout` caps at `1440px`. A naive capture loses
+the Status, Last Updated and Actions columns plus a third of the rows, and the status
+pills are the point of the app. Resize to 2000x1200, then inject an override:
+
+```js
+() => {
+  const s = document.createElement('style');
+  s.textContent = `
+    .topbar__inner, .layout { max-width: 1920px !important; }
+    .table-wrap { overflow: visible !important; max-height: none !important; }
+  `;
+  document.head.appendChild(s);
+  const w = document.querySelector('.table-wrap'), t = w.querySelector('table');
+  return { clipped: t.getBoundingClientRect().width > w.clientWidth };
+}
+```
+
+Confirm the returned `clipped` is `false` before shooting. `table { white-space: nowrap }`
+gives the table a hard intrinsic width (~1440px), so it silently re-clips if the grid
+column ends up any narrower — widen the viewport and re-check rather than assuming.
+
+This override lives only in the browser session. **Never write it into `index.html`** —
+verify with `git status` that `index.html` is unmodified before you commit.
+
+### 4c. Capture, then look at the image
+
+Take a `fullPage` screenshot saved as `screenshot.png` in the repo root, and then
+actually view it. The step-2 scan is regex over text and **cannot read a PNG**, so your
+own eyes are the only review this binary gets before it is published — confirm it
+exposes nothing it shouldn't, and that it shows the documented seed state: 14 SKUs,
+27,134 units, 5 below reorder, 4 warehouses, and **9 green / 4 amber / 1 red** pills.
+Wrong counts mean you captured a filtered, sorted or stale page — re-shoot instead of
+shipping it.
+
+Note that this file is new binary content created *after* the step-2 gate, so it rides
+along in step 5's commit. That visual check is what stands in for the scan.
+
+### 4d. Embed it
+
+Place the image directly under the live-demo link near the top of `README.md`, with alt
+text that describes the interface rather than saying "screenshot":
+
+```markdown
+![The LogiTrack Inventory dashboard: a summary strip of headline totals above the
+inventory table and the add-record form](screenshot.png)
+```
+
+Add `screenshot.png` to the repository-layout block in the README as well.
+
+### 4e. Clean up
+
+Stop the scratch server and close the browser. The MCP server writes a `.playwright-mcp`
+output directory into the project root — delete it and ignore it, and delete any rejected
+attempts so only `screenshot.png` survives:
+
+```powershell
+Remove-Item -Recurse -Force .playwright-mcp -ErrorAction SilentlyContinue
+Add-Content .gitignore "`n# Playwright MCP scratch output`n.playwright-mcp/"
+```
+
+## Step 5 — README
 
 Read `CLAUDE.md` and `index.html` first so the README describes what is actually there.
 Create or update `README.md` with:
@@ -198,13 +283,14 @@ Create or update `README.md` with:
 - Constraints worth knowing (single file, in-memory state that resets on reload,
   offline-capable, no external assets).
 - Accessibility notes.
-- A live demo link once step 5 gives you the Pages URL.
+- The dashboard screenshot from step 4, embedded under the demo link.
+- A live demo link once step 7 gives you the Pages URL.
 - Licence, if the user names one.
 
 If a `README.md` already exists, **edit it** — preserve sections the user wrote, update
 what is stale. Do not overwrite it wholesale. Commit and push the change.
 
-## Step 5 — GitHub About section
+## Step 6 — GitHub About section
 
 The About panel is repo metadata, not a file. Set it with:
 
@@ -220,11 +306,11 @@ gh repo edit <owner/repo> `
   --add-topic no-build
 ```
 
-Keep the description under ~120 characters. Set `--homepage` to the Pages URL from step 6
+Keep the description under ~120 characters. Set `--homepage` to the Pages URL from step 7
 (run this again after Pages is live if you don't have the URL yet). Propose the
 description and topics to the user before applying if they haven't specified them.
 
-## Step 6 — GitHub Pages via Actions
+## Step 7 — GitHub Pages via Actions
 
 Write `.github/workflows/pages.yml`:
 
@@ -293,10 +379,10 @@ Confirm the deployed URL:
 gh api repos/<owner>/<repo>/pages --jq .html_url
 ```
 
-Then go back and finish step 5's `--homepage` and the README demo link with that URL,
+Then go back and finish step 6's `--homepage` and the README demo link with that URL,
 and commit the README change.
 
-## Step 7 — Report
+## Step 8 — Report
 
 Tell the user, plainly:
 

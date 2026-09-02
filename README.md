@@ -107,12 +107,16 @@ The design is deliberately single-theme (light). Every colour is painted explici
 ## Repository layout
 
 ```
-index.html                            the entire application
-inventory.csv                         static snapshot of the seed data
-screenshot.png                        dashboard screenshot used in this README
-CLAUDE.md                             working guidance for Claude Code
-.mcp.json                             Playwright MCP server (project scope)
+index.html                             the entire application
+inventory.csv                          static snapshot of the seed data
+screenshot.png                         dashboard screenshot used in this README
+CLAUDE.md                              working guidance for Claude Code
+.mcp.json                              Playwright MCP server (project scope)
+.github/workflows/pages.yml            GitHub Pages deployment workflow
 .claude/commands/publish-to-github.md  /publish-to-github project command
+.claude/skills/                        project skills, including the brand system
+.agents/skills/                        shared agent skill definitions
+skills-lock.json                       pinned skill versions
 ```
 
 ## Development
