@@ -1,0 +1,25 @@
+# Node — only the test harness needs deps; the app itself has none
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+id_rsa*
+.netrc
+
+# Editor / OS local state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local agent tooling, not part of the project
+.claude/

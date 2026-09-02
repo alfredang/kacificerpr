@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogiTrack Inventory</title>
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     ============================================================ */
+  :root {
+    --bg:            #f4f6f9;
+    --card:          #ffffff;
+    --ink:           #16202e;
+    --ink-soft:      #5b6b7f;
+    --ink-faint:     #8a99ab;
+    --line:          #e3e8ef;
+    --line-strong:   #cfd7e2;
+
+    --accent:        #0f4c81;
+    --accent-dark:   #0b3a63;
+    --accent-tint:   #e8f0f8;
+
+    --ok-bg:         #e3f5e9;  --ok-fg:   #1a6b39;
+    --warn-bg:       #fdf1da;  --warn-fg: #8a5a06;
+    --bad-bg:        #fdE6e6;  --bad-fg:  #a12525;
+
+    --radius:        12px;
+    --radius-sm:     8px;
+    --shadow:        0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
+
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+            Arial, "Noto Sans", sans-serif;
+  }
+
+  /* ============================================================
+     BASE
+     ============================================================ */
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* One consistent, always-visible focus treatment. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  th button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ============================================================
+     HEADER + SUMMARY STRIP
+     ============================================================ */
+  .app-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: 20px 24px 18px;
+  }
+
+  .app-header__brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+
+  .app-header h1 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: -.01em;
+    color: var(--accent);
+  }
+
+  .app-header .tagline {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+  }
+
+  .stat__label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+
+  .stat__value {
+    display: block;
+    font-size: 22px;
+    font-weight: 650;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat--alert .stat__value { color: var(--bad-fg); }
+
+  /* ============================================================
+     LAYOUT
+     ============================================================ */
+  .layout {
+    display: grid;
+    /* The form needs a fixed comfortable width; every remaining pixel goes to
+       the table so all 11 columns fit without scrolling on a normal desktop. */
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+    align-items: start;
+    padding: 20px 24px 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    /* Keeps the sticky header and the horizontal scroller inside the rounded corners. */
+    overflow: hidden;
+  }
+
+  .card__head {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .card__head h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 650;
+  }
+
+  .card__head p {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* Provenance line under the table heading. */
+  .source-note {
+    margin: 4px 0 0 !important;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .source-note:empty { display: none; }
+  .source-note--warn {
+    color: var(--warn-fg);
+    background: var(--warn-bg);
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+
+  /* ============================================================
+     TOOLBAR (search + category filter)
+     ============================================================ */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-top: 14px;
+  }
+
+  .toolbar .field { flex: 1 1 200px; min-width: 0; }
+  .toolbar .field--narrow { flex: 0 1 200px; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+  }
+
+  input::placeholder { color: var(--ink-faint); }
+
+  input:hover, select:hover { border-color: var(--ink-faint); }
+
+  /* ============================================================
+     TABLE
+     ============================================================ */
+  /* Wide content scrolls inside the card instead of pushing the page sideways. */
+  .table-scroll {
+    overflow-x: auto;
+    max-height: 620px;
+    overflow-y: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+
+  /* Short columns stay on one line; the two free-text columns wrap instead of
+     forcing the whole table into horizontal scroll on a normal desktop. */
+  th, td { white-space: nowrap; }
+  td.wrap { white-space: normal; min-width: 128px; }
+
+  /* Header labels are the widest thing in several columns ("Reorder Level",
+     "Unit Cost (USD)"). Let the label wrap so the column is sized by its data. */
+  thead th button span:first-child { white-space: normal; }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #eef2f7;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0;
+    text-align: left;
+    font-weight: 650;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--ink-soft);
+  }
+
+  /* The whole header cell is the sort control. */
+  thead th button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 10px 9px;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  thead th button:hover { color: var(--accent); background: #e5ebf3; }
+
+  thead th[aria-sort] button { color: var(--accent); }
+
+  .sort-arrow { font-size: 9px; line-height: 1; opacity: .85; }
+
+  th.num button, td.num { text-align: right; justify-content: flex-end; }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  tbody td {
+    padding: 9px 9px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  tbody tr:nth-child(even) td { background: #fafbfd; }
+  tbody tr:hover td { background: var(--accent-tint); }
+
+  td.sku { font-weight: 600; font-variant-numeric: tabular-nums; }
+  td.muted { color: var(--ink-soft); }
+
+  .empty-row td {
+    padding: 34px 12px;
+    text-align: center;
+    color: var(--ink-soft);
+    background: var(--card) !important;
+  }
+
+  /* Status pills */
+  .pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .pill--in   { background: var(--ok-bg);   color: var(--ok-fg); }
+  .pill--low  { background: var(--warn-bg); color: var(--warn-fg); }
+  .pill--out  { background: var(--bad-bg);  color: var(--bad-fg); }
+
+  /* Row-added highlight, fades out on its own. */
+  @keyframes rowFlash {
+    from { background: #fff3cd; }
+    to   { background: transparent; }
+  }
+  tr.row-new td { animation: rowFlash 1.8s ease-out 1; }
+
+  /* ============================================================
+     BUTTONS
+     ============================================================ */
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .btn--primary { background: var(--accent); color: #fff; }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--ghost { background: var(--card); color: var(--ink-soft); border-color: var(--line-strong); }
+  .btn--ghost:hover { background: var(--bg); color: var(--ink); }
+
+  .btn--danger {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--bad-fg);
+    border: 1px solid #f0c9c9;
+    cursor: pointer;
+  }
+  .btn--danger:hover { background: var(--bad-bg); border-color: var(--bad-fg); }
+
+  /* ============================================================
+     FORM
+     ============================================================ */
+  .form-body { padding: 16px 18px 18px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid .field--full { grid-column: 1 / -1; }
+
+  .form-body .field label { color: var(--ink); font-size: 12.5px; }
+
+  .req { color: var(--bad-fg); font-weight: 700; }
+
+  .error-msg {
+    display: none;
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--bad-fg);
+  }
+  .error-msg.is-visible { display: block; }
+
+  input[aria-invalid="true"], select[aria-invalid="true"] {
+    border-color: var(--bad-fg);
+    background: #fffafa;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ============================================================
+     ANNOUNCEMENT REGION
+     ============================================================ */
+  .announcer {
+    /* Reserves its height so the layout doesn't jump when a message appears. */
+    min-height: 22px;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .announcer:empty { min-height: 22px; }
+  .announcer .note {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--ok-bg);
+    color: var(--ok-fg);
+  }
+  .announcer .note--removed { background: var(--warn-bg); color: var(--warn-fg); }
+
+  /* ============================================================
+     RESPONSIVE — single column under 900px
+     ============================================================ */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+    .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .app-header { padding: 16px; }
+    .table-scroll { max-height: none; }
+  }
+
+  @media (max-width: 520px) {
+    .form-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER + LIVE SUMMARY
+       ============================================================ -->
+  <header class="app-header">
+    <div class="app-header__brand">
+      <h1>LogiTrack Inventory</h1>
+      <p class="tagline">Warehouse stock positions across the regional network</p>
+    </div>
+
+    <ul class="summary-strip">
+      <li class="stat">
+        <span class="stat__label">Total SKUs</span>
+        <span class="stat__value" id="stat-skus">0</span>
+      </li>
+      <li class="stat">
+        <span class="stat__label">Units in Stock</span>
+        <span class="stat__value" id="stat-units">0</span>
+      </li>
+      <li class="stat stat--alert">
+        <span class="stat__label">Below Reorder Level</span>
+        <span class="stat__value" id="stat-low">0</span>
+      </li>
+      <li class="stat">
+        <span class="stat__label">Warehouses</span>
+        <span class="stat__value" id="stat-warehouses">0</span>
+      </li>
+    </ul>
+  </header>
+
+  <main class="layout">
+
+    <!-- ==========================================================
+         INVENTORY TABLE
+         ========================================================== -->
+    <section class="card" aria-labelledby="table-heading">
+      <div class="card__head">
+        <h2 id="table-heading">Inventory Records</h2>
+        <p id="result-count">Showing all records</p>
+        <p id="data-source" class="source-note"></p>
+
+        <div class="toolbar">
+          <div class="field">
+            <label for="search">Search SKU, product or supplier</label>
+            <input type="text" id="search" placeholder="e.g. PKG-, resistor, Meridian…"
+                   autocomplete="off">
+          </div>
+          <div class="field field--narrow">
+            <label for="filter-category">Category</label>
+            <select id="filter-category">
+              <option value="__all">All categories</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Confirmation messages land here; announced without stealing focus. -->
+        <div class="announcer" id="announcer" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <caption class="visually-hidden">
+            Inventory records. Column headers are buttons that sort the table.
+          </caption>
+          <thead>
+            <tr id="header-row"><!-- built in JS from COLUMNS --></tr>
+          </thead>
+          <tbody id="table-body"><!-- built in JS from state --></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         ADD RECORD FORM
+         ========================================================== -->
+    <aside class="card" aria-labelledby="form-heading">
+      <div class="card__head">
+        <h2 id="form-heading">Add Inventory Record</h2>
+        <p>Status is derived from quantity and reorder level.</p>
+      </div>
+
+      <div class="form-body">
+        <!-- novalidate: we own the validation so errors render inline, per field. -->
+        <form id="add-form" novalidate>
+          <div class="form-grid">
+
+            <div class="field field--full">
+              <label for="f-sku">SKU <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="f-sku" name="sku" autocomplete="off"
+                     placeholder="e.g. ELC-2210">
+              <p class="error-msg" id="err-sku"></p>
+            </div>
+
+            <div class="field field--full">
+              <label for="f-name">Product Name <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="f-name" name="name" autocomplete="off"
+                     placeholder="e.g. 24V Power Supply Unit">
+              <p class="error-msg" id="err-name"></p>
+            </div>
+
+            <div class="field field--full">
+              <label for="f-category">Category <span class="req" aria-hidden="true">*</span></label>
+              <select id="f-category" name="category"></select>
+              <p class="error-msg" id="err-category"></p>
+            </div>
+
+            <div class="field field--full">
+              <label for="f-warehouse">Warehouse <span class="req" aria-hidden="true">*</span></label>
+              <select id="f-warehouse" name="warehouse"></select>
+              <p class="error-msg" id="err-warehouse"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-qty">Quantity <span class="req" aria-hidden="true">*</span></label>
+              <input type="number" id="f-qty" name="qty" min="0" step="1" placeholder="0">
+              <p class="error-msg" id="err-qty"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-reorder">Reorder Level <span class="req" aria-hidden="true">*</span></label>
+              <input type="number" id="f-reorder" name="reorder" min="0" step="1" placeholder="0">
+              <p class="error-msg" id="err-reorder"></p>
+            </div>
+
+            <div class="field field--full">
+              <label for="f-cost">Unit Cost (USD) <span class="req" aria-hidden="true">*</span></label>
+              <input type="number" id="f-cost" name="cost" min="0" step="0.01" placeholder="0.00">
+              <p class="error-msg" id="err-cost"></p>
+            </div>
+
+            <div class="field field--full">
+              <label for="f-supplier">Supplier <span class="req" aria-hidden="true">*</span></label>
+              <input type="text" id="f-supplier" name="supplier" autocomplete="off"
+                     placeholder="e.g. Meridian Components Pte Ltd">
+              <p class="error-msg" id="err-supplier"></p>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Add Record</button>
+            <button type="button" class="btn btn--ghost" id="clear-form">Clear</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Fallback copy of inventory.csv, used only when fetch() is blocked
+       (i.e. when this page is opened directly from disk over file://).
+       Must stay byte-identical to inventory.csv; after editing that file run
+       `node tools/sync-embedded-csv.js` to refresh this block. -->
+  <script type="text/csv" id="embedded-csv">
+sku,name,category,warehouse,qty,reorder,cost,supplier,updated
+RAW-1001,Cold-Rolled Steel Coil 1.2mm,Raw Materials,Johor DC,1840,600,742.50,Sentosa Metals Sdn Bhd,2026-08-24
+RAW-1042,Food-Grade HDPE Pellets 25kg,Raw Materials,Jakarta Depot,420,450,63.20,Nusantara Polymer Tbk,2026-08-28
+RAW-1078,Natural Rubber Sheet RSS3,Raw Materials,Bangkok Cross-dock,0,200,118.00,Chao Phraya Rubber Co,2026-08-19
+PKG-2003,Corrugated Carton 400x300x250,Packaging,Singapore Hub,12480,3000,0.86,Pacific Pulp & Paper,2026-08-30
+PKG-2031,Stretch Wrap Film 500mm Roll,Packaging,Johor DC,940,400,11.75,Pacific Pulp & Paper,2026-08-26
+PKG-2077,Thermal Shipping Label 4x6,Packaging,Singapore Hub,168,250,14.40,Straits Label Works,2026-09-01
+ELC-3010,IoT Cargo Tracker Module v3,Electronics,Singapore Hub,612,150,128.90,Meridian Components Pte Ltd,2026-08-31
+ELC-3044,Temperature Logger USB,Electronics,Bangkok Cross-dock,74,120,46.35,Meridian Components Pte Ltd,2026-08-27
+ELC-3092,Barcode Scanner Cradle 2D,Electronics,Jakarta Depot,205,80,213.00,Andaman Electronics Ltd,2026-08-22
+FIN-4102,Portable Air Compressor 50L,Finished Goods,Johor DC,318,100,389.99,Kinabalu Manufacturing,2026-08-29
+FIN-4155,Industrial Pallet Jack 2.5T,Finished Goods,Singapore Hub,46,60,615.00,Kinabalu Manufacturing,2026-08-25
+FIN-4188,Cold Chain Insulated Tote 60L,Finished Goods,Jakarta Depot,1275,300,74.20,Java Cold Systems,2026-09-01
+SPR-5006,Conveyor Drive Belt 3m,Spare Parts,Bangkok Cross-dock,88,40,156.40,Mekong Industrial Supply,2026-08-21
+SPR-5029,Forklift Hydraulic Seal Kit,Spare Parts,Johor DC,0,25,92.75,Mekong Industrial Supply,2026-08-18
+SPR-5061,Pallet Racking Beam 2700mm,Spare Parts,Singapore Hub,530,150,58.10,Sentosa Metals Sdn Bhd,2026-08-23
+RAW-1103,Aluminium Ingot 99.7%,Raw Materials,Singapore Hub,760,250,2380.00,Sentosa Metals Sdn Bhd,2026-08-20
+RAW-1126,Industrial Silica Sand 50kg,Raw Materials,Jakarta Depot,3150,800,18.40,Nusantara Polymer Tbk,2026-08-27
+RAW-1154,Kraft Paper Reel 120gsm,Raw Materials,Bangkok Cross-dock,215,240,96.75,Pacific Pulp & Paper,2026-08-16
+PKG-2104,Moulded Pulp Tray 6-cavity,Packaging,Jakarta Depot,7420,2500,0.42,Pacific Pulp & Paper,2026-08-29
+PKG-2138,Polypropylene Strapping Band,Packaging,Bangkok Cross-dock,0,300,27.60,Straits Label Works,2026-08-14
+PKG-2166,Desiccant Sachet 50g Box of 500,Packaging,Johor DC,612,200,38.90,Java Cold Systems,2026-08-31
+ELC-3121,RFID Gate Reader UHF,Electronics,Singapore Hub,58,45,1145.00,Andaman Electronics Ltd,2026-08-30
+ELC-3157,Handheld Terminal Battery Pack,Electronics,Johor DC,340,150,67.80,Meridian Components Pte Ltd,2026-08-24
+ELC-3183,Warehouse LED High-bay 150W,Electronics,Jakarta Depot,126,130,88.25,Andaman Electronics Ltd,2026-08-18
+FIN-4210,Electric Stacker 1.5T,Finished Goods,Bangkok Cross-dock,27,30,4280.00,Kinabalu Manufacturing,2026-08-28
+FIN-4247,Collapsible Bulk Container 1200L,Finished Goods,Singapore Hub,410,120,268.50,Java Cold Systems,2026-09-01
+FIN-4269,Vacuum Sealer Bench Unit,Finished Goods,Johor DC,0,20,1735.00,Kinabalu Manufacturing,2026-08-15
+SPR-5088,Roller Bearing Assembly 6205,Spare Parts,Jakarta Depot,1460,400,12.30,Mekong Industrial Supply,2026-08-26
+SPR-5113,Dock Leveller Hydraulic Pump,Spare Parts,Singapore Hub,34,45,824.00,Sentosa Metals Sdn Bhd,2026-08-22
+SPR-5147,Pallet Wrapper Turntable Motor,Spare Parts,Bangkok Cross-dock,72,30,396.60,Mekong Industrial Supply,2026-08-19
+  </script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     1. CONSTANTS
+     ============================================================ */
+
+  var CATEGORIES = [
+    'Raw Materials',
+    'Packaging',
+    'Electronics',
+    'Finished Goods',
+    'Spare Parts'
+  ];
+
+  var WAREHOUSES = [
+    'Singapore Hub',
+    'Johor DC',
+    'Jakarta Depot',
+    'Bangkok Cross-dock'
+  ];
+
+  /* Column metadata drives both the <thead> markup and the sort comparator,
+     so the two can never drift apart. `type` picks the comparison strategy. */
+  var COLUMNS = [
+    { key: 'sku',       label: 'SKU',             type: 'text' },
+    { key: 'name',      label: 'Product Name',    type: 'text' },
+    { key: 'category',  label: 'Category',        type: 'text' },
+    { key: 'warehouse', label: 'Warehouse',       type: 'text' },
+    { key: 'qty',       label: 'Quantity',        type: 'number' },
+    { key: 'reorder',   label: 'Reorder Level',   type: 'number' },
+    { key: 'cost',      label: 'Unit Cost (USD)', type: 'number' },
+    { key: 'supplier',  label: 'Supplier',        type: 'text' },
+    { key: 'status',    label: 'Status',          type: 'status' },
+    { key: 'updated',   label: 'Last Updated',    type: 'text' },
+    { key: 'actions',   label: 'Actions',         type: null }   // not sortable
+  ];
+
+  /* Sorting "Status" by name would be meaningless; rank by urgency instead. */
+  var STATUS_RANK = { 'Out of Stock': 0, 'Low Stock': 1, 'In Stock': 2 };
+
+  /* ============================================================
+     2. STATE — single source of truth
+     ============================================================ */
+
+  var nextId = 1;
+
+  /* Records are loaded from inventory.csv at startup (see section 3a). This
+     array remains the single source of truth once loaded — every render, and
+     every add/delete, goes through it and nothing re-reads the CSV. */
+  var inventory = [];
+
+  /* Where the rows actually came from, surfaced under the table heading. */
+  var dataSource = { label: '', detail: '', degraded: false };
+  var isLoading = true;
+
+  /* View-only state. Never mutated by the data layer. */
+  var filters = { query: '', category: '__all' };
+  var sort = { key: 'sku', dir: 'asc' };
+
+  /* ============================================================
+     3. CSV LOADING
+     ============================================================ */
+
+  var CSV_URL = 'inventory.csv';
+  var CSV_COLUMNS = ['sku', 'name', 'category', 'warehouse', 'qty', 'reorder', 'cost', 'supplier', 'updated'];
+
+  /* RFC 4180 parser: handles quoted fields, embedded commas/newlines, and ""
+     escapes, so hand-edited spreadsheet exports load without surprises. */
+  function parseCSV(text) {
+    var rows = [];
+    var row = [];
+    var value = '';
+    var inQuotes = false;
+    var i = 0;
+
+    /* Strip a UTF-8 BOM — Excel writes one and it corrupts the first header. */
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+    while (i < text.length) {
+      var char = text[i];
+
+      if (inQuotes) {
+        if (char === '"') {
+          if (text[i + 1] === '"') { value += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
+        }
+        value += char; i++; continue;
+      }
+
+      if (char === '"') { inQuotes = true; i++; continue; }
+      if (char === ',') { row.push(value); value = ''; i++; continue; }
+      if (char === '\r') { i++; continue; }
+      if (char === '\n') { row.push(value); rows.push(row); row = []; value = ''; i++; continue; }
+
+      value += char; i++;
+    }
+
+    /* Flush the last field/row when the file doesn't end in a newline. */
+    if (value !== '' || row.length > 0) { row.push(value); rows.push(row); }
+
+    /* Drop blank lines. */
+    return rows.filter(function (r) {
+      return r.some(function (c) { return c.trim() !== ''; });
+    });
+  }
+
+  /* Turns parsed CSV rows into validated records. Bad rows are skipped and
+     counted rather than allowed to poison the table with NaN. */
+  function recordsFromCSV(text) {
+    var rows = parseCSV(text);
+    if (rows.length === 0) throw new Error('inventory.csv is empty');
+
+    var header = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+    var missing = CSV_COLUMNS.filter(function (c) { return header.indexOf(c) === -1; });
+    if (missing.length) throw new Error('inventory.csv is missing column(s): ' + missing.join(', '));
+
+    var index = {};
+    CSV_COLUMNS.forEach(function (c) { index[c] = header.indexOf(c); });
+
+    var records = [];
+    var skipped = 0;
+    var seen = {};
+
+    rows.slice(1).forEach(function (cells) {
+      var get = function (c) { return (cells[index[c]] || '').trim(); };
+
+      var qty = Number(get('qty'));
+      var reorder = Number(get('reorder'));
+      var cost = Number(get('cost'));
+      var sku = get('sku');
+
+      var valid = sku && get('name') && get('supplier') &&
+        isFinite(qty) && qty >= 0 &&
+        isFinite(reorder) && reorder >= 0 &&
+        isFinite(cost) && cost >= 0 &&
+        !seen[sku.toLowerCase()];
+
+      if (!valid) { skipped++; return; }
+      seen[sku.toLowerCase()] = true;
+
+      records.push({
+        id: nextId++,
+        sku: sku,
+        name: get('name'),
+        category: get('category'),
+        warehouse: get('warehouse'),
+        qty: Math.round(qty),
+        reorder: Math.round(reorder),
+        cost: Math.round(cost * 100) / 100,
+        supplier: get('supplier'),
+        updated: get('updated')
+      });
+    });
+
+    return { records: records, skipped: skipped };
+  }
+
+  /* Fetches the CSV, falling back to the copy embedded in this page.
+     The fallback matters because browsers block fetch() on file:// URLs, and
+     this app is meant to run by double-clicking it. */
+  function loadInventory() {
+    var attempt;
+
+    /* Guarded: a bare fetch() call throws a synchronous ReferenceError where
+       fetch is unavailable, which would escape the .catch() below entirely. */
+    try {
+      attempt = (typeof fetch === 'function')
+        ? fetch(CSV_URL, { cache: 'no-store' }).then(function (response) {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.text();
+          }).then(function (text) {
+            return { text: text, degraded: false };
+          })
+        : Promise.reject(new Error('fetch() is not available in this browser'));
+    } catch (error) {
+      attempt = Promise.reject(error);
+    }
+
+    return attempt
+      .catch(function (error) {
+        var embedded = document.getElementById('embedded-csv');
+        if (!embedded) throw error;
+        return {
+          text: embedded.textContent,
+          degraded: true,
+          reason: location.protocol === 'file:'
+            ? 'Browsers block fetch() on file:// URLs'
+            : 'Could not fetch ' + CSV_URL + ' (' + error.message + ')'
+        };
+      });
+  }
+
+  /* ============================================================
+     4. HELPERS — derivation + formatting
+     ============================================================ */
+
+  var moneyFmt = new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD',
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+  var qtyFmt = new Intl.NumberFormat('en-US');
+
+  /* Status is always computed, never stored — quantity is the only truth. */
+  function getStatus(record) {
+    if (record.qty === 0) return 'Out of Stock';
+    if (record.qty <= record.reorder) return 'Low Stock';
+    return 'In Stock';
+  }
+
+  function statusClass(status) {
+    if (status === 'Out of Stock') return 'pill--out';
+    if (status === 'Low Stock') return 'pill--low';
+    return 'pill--in';
+  }
+
+  function todayISO() {
+    var now = new Date();
+    return now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0');
+  }
+
+  /* Small DOM helper — building cells with textContent keeps user input inert. */
+  function cell(text, className) {
+    var td = document.createElement('td');
+    td.textContent = text;
+    if (className) td.className = className;
+    return td;
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ============================================================
+     5. RENDER — every pixel derives from `inventory`
+     ============================================================ */
+
+  /* Applies search + category filter, then the active sort. Returns a new array
+     so the underlying state order is never disturbed by a sort click. */
+  function getVisibleRecords() {
+    var query = filters.query.trim().toLowerCase();
+
+    var rows = inventory.filter(function (r) {
+      if (filters.category !== '__all' && r.category !== filters.category) return false;
+      if (!query) return true;
+      return r.sku.toLowerCase().indexOf(query) !== -1 ||
+             r.name.toLowerCase().indexOf(query) !== -1 ||
+             r.supplier.toLowerCase().indexOf(query) !== -1;
+    });
+
+    var column = COLUMNS.filter(function (c) { return c.key === sort.key; })[0];
+    var direction = sort.dir === 'asc' ? 1 : -1;
+
+    rows.sort(function (a, b) {
+      var result;
+      if (!column) {
+        result = 0;
+      } else if (column.type === 'number') {
+        result = a[sort.key] - b[sort.key];
+      } else if (column.type === 'status') {
+        result = STATUS_RANK[getStatus(a)] - STATUS_RANK[getStatus(b)];
+      } else {
+        result = String(a[sort.key]).localeCompare(String(b[sort.key]));
+      }
+      /* SKU is the stable tiebreaker so equal values never shuffle between renders. */
+      if (result === 0) result = a.sku.localeCompare(b.sku);
+      return result * direction;
+    });
+
+    return rows;
+  }
+
+  /* Builds the sortable header row once; sort indicators are refreshed separately. */
+  function renderHeader() {
+    var row = $('header-row');
+    row.innerHTML = '';
+
+    COLUMNS.forEach(function (column) {
+      var th = document.createElement('th');
+      th.scope = 'col';
+      if (column.type === 'number') th.className = 'num';
+
+      if (column.type === null) {
+        /* Actions column isn't sortable — plain label, no button. */
+        th.textContent = column.label;
+        th.style.padding = '10px 12px';
+      } else {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.sortKey = column.key;
+        button.innerHTML = '<span></span><span class="sort-arrow"></span>';
+        button.firstChild.textContent = column.label;
+        th.appendChild(button);
+      }
+      row.appendChild(th);
+    });
+
+    renderSortIndicators();
+  }
+
+  /* Marks the active column with aria-sort and a small arrow. */
+  function renderSortIndicators() {
+    var headers = $('header-row').querySelectorAll('th');
+
+    headers.forEach(function (th) {
+      var button = th.querySelector('button');
+      if (!button) return;
+
+      var arrow = button.querySelector('.sort-arrow');
+      if (button.dataset.sortKey === sort.key) {
+        th.setAttribute('aria-sort', sort.dir === 'asc' ? 'ascending' : 'descending');
+        arrow.textContent = sort.dir === 'asc' ? '▲' : '▼';
+      } else {
+        th.removeAttribute('aria-sort');
+        arrow.textContent = '';
+      }
+    });
+  }
+
+  function renderTable() {
+    var body = $('table-body');
+    var rows = getVisibleRecords();
+    body.innerHTML = '';
+
+    if (rows.length === 0) {
+      var emptyRow = document.createElement('tr');
+      emptyRow.className = 'empty-row';
+      /* Three different empty states, and saying the wrong one misleads:
+         still loading / the CSV gave us nothing / the filter matched nothing. */
+      var td = document.createElement('td');
+      td.colSpan = COLUMNS.length;
+      td.textContent = isLoading ? 'Loading inventory…'
+        : inventory.length === 0 ? 'No inventory data loaded'
+        : 'No records match';
+      emptyRow.appendChild(td);
+      body.appendChild(emptyRow);
+    } else {
+      rows.forEach(function (record) {
+        var tr = document.createElement('tr');
+        tr.dataset.id = record.id;
+
+        tr.appendChild(cell(record.sku, 'sku'));
+        tr.appendChild(cell(record.name, 'wrap'));
+        tr.appendChild(cell(record.category, 'muted'));
+        tr.appendChild(cell(record.warehouse, 'muted'));
+        tr.appendChild(cell(qtyFmt.format(record.qty), 'num'));
+        tr.appendChild(cell(qtyFmt.format(record.reorder), 'num'));
+        tr.appendChild(cell(moneyFmt.format(record.cost), 'num'));
+        tr.appendChild(cell(record.supplier, 'muted wrap'));
+
+        var status = getStatus(record);
+        var statusCell = document.createElement('td');
+        var pill = document.createElement('span');
+        pill.className = 'pill ' + statusClass(status);
+        pill.textContent = status;
+        statusCell.appendChild(pill);
+        tr.appendChild(statusCell);
+
+        tr.appendChild(cell(record.updated, 'muted'));
+
+        var actionCell = document.createElement('td');
+        var deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn--danger';
+        deleteButton.dataset.action = 'delete';
+        deleteButton.dataset.id = record.id;
+        deleteButton.textContent = 'Delete';
+        /* Screen readers get the SKU; sighted users get it from the row. */
+        deleteButton.setAttribute('aria-label', 'Delete record ' + record.sku);
+        actionCell.appendChild(deleteButton);
+        tr.appendChild(actionCell);
+
+        body.appendChild(tr);
+      });
+    }
+
+    /* Result count doubles as feedback that a filter is active. */
+    var isFiltered = filters.query.trim() !== '' || filters.category !== '__all';
+    $('result-count').textContent = isFiltered
+      ? 'Showing ' + rows.length + ' of ' + inventory.length + ' records'
+      : 'Showing all ' + inventory.length + ' records';
+
+    renderSortIndicators();
+  }
+
+  /* Summary reflects the whole dataset, not the filtered view. */
+  function renderSummary() {
+    var totalUnits = 0;
+    var belowReorder = 0;
+    var warehouses = {};
+
+    inventory.forEach(function (record) {
+      totalUnits += record.qty;
+      if (record.qty <= record.reorder) belowReorder++;
+      warehouses[record.warehouse] = true;
+    });
+
+    $('stat-skus').textContent = qtyFmt.format(inventory.length);
+    $('stat-units').textContent = qtyFmt.format(totalUnits);
+    $('stat-low').textContent = qtyFmt.format(belowReorder);
+    $('stat-warehouses').textContent = Object.keys(warehouses).length;
+  }
+
+  /* Says where the rows came from, and warns when the CSV could not be read. */
+  function renderSource() {
+    var note = $('data-source');
+    if (isLoading) { note.textContent = ''; note.className = 'source-note'; return; }
+
+    note.className = 'source-note' + (dataSource.degraded ? ' source-note--warn' : '');
+    note.textContent = dataSource.degraded
+      ? 'Data source: ' + dataSource.label + ' — ' + dataSource.detail
+      : 'Data source: ' + dataSource.label + (dataSource.detail ? ' — ' + dataSource.detail : '');
+  }
+
+  /* Called after every mutation so the renders can never disagree. */
+  function renderAll() {
+    renderTable();
+    renderSummary();
+    renderSource();
+  }
+
+  var announceTimer = null;
+
+  /* Inline, non-blocking confirmation — no alert()/confirm() anywhere. */
+  function announce(message, variant) {
+    var region = $('announcer');
+    region.innerHTML = '';
+
+    var note = document.createElement('span');
+    note.className = 'note' + (variant ? ' note--' + variant : '');
+    note.textContent = message;
+    region.appendChild(note);
+
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(function () { region.innerHTML = ''; }, 4000);
+  }
+
+  /* ============================================================
+     6. FORM VALIDATION
+     ============================================================ */
+
+  var FIELDS = ['sku', 'name', 'category', 'warehouse', 'qty', 'reorder', 'cost', 'supplier'];
+
+  function clearErrors() {
+    FIELDS.forEach(function (field) {
+      var message = $('err-' + field);
+      message.textContent = '';
+      message.classList.remove('is-visible');
+
+      var input = $('f-' + field);
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    });
+  }
+
+  function showError(field, message) {
+    var box = $('err-' + field);
+    box.textContent = message;
+    box.classList.add('is-visible');
+
+    var input = $('f-' + field);
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', 'err-' + field);
+  }
+
+  /* Parses a non-negative number field. Returns null when unusable. */
+  function parseNonNegative(raw, allowDecimals) {
+    if (raw.trim() === '') return null;
+    var value = Number(raw);
+    if (!isFinite(value) || value < 0) return null;
+    return allowDecimals ? Math.round(value * 100) / 100 : Math.round(value);
+  }
+
+  /* Returns { errors: {field: message}, record: {...}|null }. */
+  function validateForm() {
+    var errors = {};
+
+    var sku = $('f-sku').value.trim();
+    var name = $('f-name').value.trim();
+    var category = $('f-category').value;
+    var warehouse = $('f-warehouse').value;
+    var supplier = $('f-supplier').value.trim();
+
+    if (!sku) {
+      errors.sku = 'SKU is required.';
+    } else if (inventory.some(function (r) { return r.sku.toLowerCase() === sku.toLowerCase(); })) {
+      errors.sku = 'SKU "' + sku + '" already exists. Enter a unique SKU.';
+    }
+
+    if (!name) errors.name = 'Product name is required.';
+    if (!category) errors.category = 'Select a category.';
+    if (!warehouse) errors.warehouse = 'Select a warehouse.';
+    if (!supplier) errors.supplier = 'Supplier is required.';
+
+    var qty = parseNonNegative($('f-qty').value, false);
+    if (qty === null) errors.qty = 'Enter a quantity of 0 or more.';
+
+    var reorder = parseNonNegative($('f-reorder').value, false);
+    if (reorder === null) errors.reorder = 'Enter a reorder level of 0 or more.';
+
+    var cost = parseNonNegative($('f-cost').value, true);
+    if (cost === null) errors.cost = 'Enter a unit cost of 0.00 or more.';
+
+    if (Object.keys(errors).length > 0) return { errors: errors, record: null };
+
+    return {
+      errors: errors,
+      record: {
+        id: nextId++,
+        sku: sku,
+        name: name,
+        category: category,
+        warehouse: warehouse,
+        qty: qty,
+        reorder: reorder,
+        cost: cost,
+        supplier: supplier,
+        updated: todayISO()
+      }
+    };
+  }
+
+  /* ============================================================
+     7. EVENT HANDLERS
+     ============================================================ */
+
+  function handleSearch(event) {
+    filters.query = event.target.value;
+    renderTable();
+  }
+
+  function handleCategoryFilter(event) {
+    filters.category = event.target.value;
+    renderTable();
+  }
+
+  /* Delegated on <thead>: one listener covers every current and future header. */
+  function handleSortClick(event) {
+    var button = event.target.closest('button[data-sort-key]');
+    if (!button) return;
+
+    var key = button.dataset.sortKey;
+    if (sort.key === key) {
+      sort.dir = sort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sort.key = key;
+      sort.dir = 'asc';
+    }
+    renderTable();
+  }
+
+  /* Delegated on <tbody>: delete buttons are rebuilt on every render, so the
+     listener lives on the container that survives them. */
+  function handleTableClick(event) {
+    var button = event.target.closest('button[data-action="delete"]');
+    if (!button) return;
+
+    var id = Number(button.dataset.id);
+    var index = inventory.findIndex(function (r) { return r.id === id; });
+    if (index === -1) return;
+
+    var removed = inventory[index];
+    inventory.splice(index, 1);
+    renderAll();
+    announce(removed.sku + ' — ' + removed.name + ' removed from inventory.', 'removed');
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    clearErrors();
+
+    var result = validateForm();
+
+    if (result.record === null) {
+      Object.keys(result.errors).forEach(function (field) {
+        showError(field, result.errors[field]);
+      });
+      /* Send focus to the first problem so keyboard users land on it. */
+      var firstBad = FIELDS.filter(function (f) { return result.errors[f]; })[0];
+      if (firstBad) $('f-' + firstBad).focus();
+      return;
+    }
+
+    inventory.push(result.record);
+    renderAll();
+    event.target.reset();
+
+    announce(result.record.sku + ' added to ' + result.record.warehouse + '.');
+
+    /* Highlight the new row wherever the current sort placed it. */
+    var newRow = $('table-body').querySelector('tr[data-id="' + result.record.id + '"]');
+    if (newRow) {
+      newRow.classList.add('row-new');
+      /* Guarded: not every embedding context implements scrollIntoView. */
+      if (typeof newRow.scrollIntoView === 'function') {
+        newRow.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    $('f-sku').focus();
+  }
+
+  function handleClear() {
+    $('add-form').reset();
+    clearErrors();
+    $('f-sku').focus();
+  }
+
+  /* ============================================================
+     8. INITIALISATION
+     ============================================================ */
+
+  /* Both the filter dropdown and the form select come from the same constant,
+     so their option lists can't fall out of sync. */
+  function populateSelects() {
+    var filterSelect = $('filter-category');
+    var categorySelect = $('f-category');
+    var warehouseSelect = $('f-warehouse');
+
+    /* Empty-valued placeholders so "not chosen" is a real, catchable state. */
+    categorySelect.appendChild(new Option('Select a category…', ''));
+    warehouseSelect.appendChild(new Option('Select a warehouse…', ''));
+
+    CATEGORIES.forEach(function (category) {
+      filterSelect.appendChild(new Option(category, category));
+      categorySelect.appendChild(new Option(category, category));
+    });
+
+    WAREHOUSES.forEach(function (warehouse) {
+      warehouseSelect.appendChild(new Option(warehouse, warehouse));
+    });
+  }
+
+  function init() {
+    populateSelects();
+    renderHeader();
+
+    $('search').addEventListener('input', handleSearch);
+    $('filter-category').addEventListener('change', handleCategoryFilter);
+    $('header-row').addEventListener('click', handleSortClick);
+    $('table-body').addEventListener('click', handleTableClick);
+    $('add-form').addEventListener('submit', handleSubmit);
+    $('clear-form').addEventListener('click', handleClear);
+
+    /* Paint the empty shell first so the page is never blank while loading. */
+    renderAll();
+
+    return loadInventory().then(function (result) {
+      var parsed = recordsFromCSV(result.text);
+      inventory = parsed.records;
+      isLoading = false;
+
+      dataSource = {
+        label: CSV_URL,
+        degraded: !!result.degraded,
+        detail: result.degraded
+          ? result.reason + ' — showing the copy embedded in this page.'
+          : ''
+      };
+      if (parsed.skipped > 0) {
+        dataSource.detail += (dataSource.detail ? ' ' : '') +
+          parsed.skipped + ' row(s) skipped as invalid or duplicate.';
+      }
+
+      renderAll();
+    }).catch(function (error) {
+      /* A broken CSV must say so plainly rather than render an empty table. */
+      inventory = [];
+      isLoading = false;
+      dataSource = { label: CSV_URL, degraded: true, detail: 'Could not load data: ' + error.message };
+      renderAll();
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
