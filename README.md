@@ -77,6 +77,14 @@ Pushing to `main` triggers `.github/workflows/pages.yml`, which uploads the repo
 as-is and deploys it to GitHub Pages. There is no build step to configure — the
 static files are the artifact.
 
+**If you fork this, the first run will fail.** The workflow sets
+`actions/configure-pages` to `enablement: true`, but creating a Pages site needs
+admin rights that the workflow's `GITHUB_TOKEN` does not have, so it dies with
+`Create Pages site failed. Error: Resource not accessible by integration`. Enable
+Pages once by hand — Settings → Pages → Source: **GitHub Actions**, or
+`gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow` — and re-run the
+workflow. Every deploy after that works unattended.
+
 ## Conventions a contributor could break by accident
 
 The script in `index.html` is split into numbered sections (`1. CONSTANTS` …
