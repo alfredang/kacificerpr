@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-LogiTrack Inventory — a single-file warehouse inventory dashboard. There is no build
-step and no runtime dependencies. The entire app is [index.html](index.html) (design
-tokens + CSS, markup, and one IIFE of ES5-style vanilla JS), with 30 seed records in
+LogiTrack Inventory — a single-file warehouse inventory dashboard in Kacific livery.
+There is no build step, no runtime dependencies and no network requests. The entire
+app is [index.html](index.html) (design tokens + CSS, markup, one IIFE of ES5-style
+vanilla JS, and the logo/favicon inlined as `data:` URIs), with 30 seed records in
 [inventory.csv](inventory.csv).
+
+Page order: ticker → header → hero band → KPI cards → table + add form → FAQ → footer.
 
 `tools/` holds optional Node maintenance scripts that are **not** part of the app and
 never run in the browser: [sync-embedded-csv.js](tools/sync-embedded-csv.js) and
@@ -92,7 +95,12 @@ The invariants worth knowing before editing:
   fields, embedded commas/newlines, `""` escapes and a UTF-8 BOM. `recordsFromCSV()`
   skips invalid or duplicate-SKU rows and reports the count in the source note rather
   than letting `NaN` reach the table.
-- **Summary stats reflect the whole dataset**, not the filtered view.
+- **The four KPI cards reflect the whole dataset**, not the filtered view — a search
+  must never make the network look healthier than it is. `renderSummary()` also fills
+  the sub-line under each figure, shows `—` plus "Loading…" while the CSV is in
+  flight, and flips the reorder card from red to green when nothing is below level.
+- **The FAQ and footer are static markup.** No JS touches them; the `<details>`
+  accordions are native.
 
 ## Conventions to preserve
 
@@ -109,7 +117,20 @@ The invariants worth knowing before editing:
 - Comments explain *why* a decision was made (the `fetch()` guard, the status ranking,
   the `novalidate` form). Match that register; do not narrate the obvious.
 - Colours, spacing and radii come from the `:root` design tokens — add a token rather
-  than hard-coding a value.
+  than hard-coding a value. The blues, greys, type weights and radii are Kacific brand
+  values, measured from kacific.com — the `kacific-branding` skill in `.claude/`
+  (local only, not committed) holds the source measurements and the logo files.
+- **No external resources, ever.** No `<link>` to Google Fonts, no CDN script, no
+  hotlinked image — all of it breaks `file://`, and `tools/test.js` fails the build
+  if a remote `src`/`href`/`@import`/`url()` appears. Montserrat is used when locally
+  installed and falls back to the system stack; the logo is a `data:` URI.
+- The status colours are functional, not brand: keep `In Stock` / `Low Stock` /
+  `Out of Stock` reading as green/amber/red rather than recolouring them to blue.
+- Uppercase is reserved for button labels and table headers; the brand adds no
+  letter-spacing to body or headings.
+- Motion is decoration: everything animated is disabled under
+  `prefers-reduced-motion`, and transitions list their properties rather than
+  using `transition: all`.
 
 ## Failure paths that must keep working
 

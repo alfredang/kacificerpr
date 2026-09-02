@@ -3,34 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LogiTrack Inventory</title>
+<title>LogiTrack Inventory — Kacific</title>
+<meta name="description" content="Live warehouse stock positions across the Kacific Asia-Pacific distribution network.">
+<meta name="theme-color" content="#034ea2">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAADCklEQVRYhe3WT2gdVRQG8F/DQ0J4FAklSimxSBcKRYt2UVy0Ltqgi1ekjoyzGUVQVwqtuCjYhQsXFRG7KYj472kdnw4YmIVVFxYUEREJtUoRF0FCiaGWUB4lSAgu5r528pyXl1ZBF/lgYO65557znXPPveeygQ38x9h0I4uyTn4TdmE37sQkxjGKZSziN/yIr3E2iaOVf0Qg6+RjOIhHMIVmmFrCOfyKeVwJ8s2B2E408CZOJnF08boIZJ18AofxlDJKweHHOI2ZJI7+HGJjGw4hwRtJHL01lEDWyUdxBEeV0a7gQ5xI4ui7YcQH2GzgCdyGY0kcrdQSyDr5XTilTB98jsNJHP18I45r7O/EriSO3v8bgayTH8J7GFPu5zN4Z1ARXS+arfZIt0hXQpALqwhknTzF2xhRFtSDSRzN9Bk4guM1to92i/SVit4U3sWWis63SLpFOhf8bWtUnE8pK3UEC9iXxNEvNY4OKKu6H2eC4waO4YVgq4eTeK5bpEsV2YVNwfkEfgpsl4Pzb/o9NFvtUfyh3J4qLuEW5Sk5hf2VuSt4slukH9SQvhrJS66l6uU65wF7apxTRr8HHWytyM/j4W6RDizeRtbJb8XjYbyofn97ODBAPokvrd6aj5SRX17DnobydustzJM4WmvB/gHy3X3jaWWxDT05I7i3Mv5qkGKz1R6vcTQIB8M3FCO4uTJeWEP3fquruoezA+xmzVb7vvUQqDaHLYMUDd7/F5W9oh+jKJqt9h3DCFTTvm8N3br9X8GZbpG+hldr5sfxWbPV3lozd5XANC6E8aPhVKxCs9Xejh0163/oFuml8P+8sln1YxKfNlvtzXUEehfRQ/gkyE6jlcTRcoXABO6pWT/XLdJzFb1RZa3U4Xy3SGdrCQQSz+JEGE7jsSFH8l9BfzN6AK8r0zarfAvk1WysB1kn7xXz4rC1de14TPloeFr5HphDji8wg/lqaw6PjEncrnyeXcbserO35pMs6+Q7sBd3Y7trx3Q+fBfxu/Iu+D6Jo6UaMxvYwP8bfwFufemEyETVIgAAAABJRU5ErkJggg==">
 <style>
   /* ============================================================
      DESIGN TOKENS
+     Kacific brand values (measured from kacific.com) sit alongside the
+     app's functional tokens. Nothing below hard-codes a colour.
      ============================================================ */
   :root {
-    --bg:            #f4f6f9;
-    --card:          #ffffff;
-    --ink:           #16202e;
-    --ink-soft:      #5b6b7f;
-    --ink-faint:     #8a99ab;
+    /* --- Kacific blues --------------------------------------- */
+    --blue:          #034ea2;   /* primary; exact logo blue; 8.03:1 on white */
+    --blue-deep:     #003c72;   /* pressed / active */
+    --blue-footer:   #07529e;   /* footer + dark bands; white text = 7.75:1 */
+    --sky:           #358ccb;   /* secondary; bands, UI accents (3.64:1 — not for small text) */
+    --wave:          #52a4ca;   /* decorative band only */
+    --cyan:          #5dc1d4;   /* decorative arc line-work only */
+
+    /* --- Neutrals -------------------------------------------- */
+    --orbit-grey:    #a7a9ac;   /* the logo swoosh; dividers, non-text */
+    --ink:           #111111;
+    --ink-soft:      #616161;   /* 6.19:1 — the grey the brand uses for real text */
+    --ink-faint:     #767676;   /* 4.54:1 — still AA at small sizes */
     --line:          #e3e8ef;
     --line-strong:   #cfd7e2;
+    --card:          #ffffff;
+    --bg:            #ffffff;
+    --tint:          #f1f4fa;   /* pale blue section wash */
+    --neutral:       #f4f4f4;   /* grey section wash */
+    --accent-tint:   #e8f0f8;   /* row hover */
 
-    --accent:        #0f4c81;
-    --accent-dark:   #0b3a63;
-    --accent-tint:   #e8f0f8;
-
+    /* --- Functional status colours ---------------------------
+       Deliberately NOT brand blues: stock status has to read as
+       traffic-light semantics at a glance, not as decoration. */
     --ok-bg:         #e3f5e9;  --ok-fg:   #1a6b39;
     --warn-bg:       #fdf1da;  --warn-fg: #8a5a06;
-    --bad-bg:        #fdE6e6;  --bad-fg:  #a12525;
+    --bad-bg:        #fde6e6;  --bad-fg:  #a12525;
 
-    --radius:        12px;
-    --radius-sm:     8px;
-    --shadow:        0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
-
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    /* --- Type ------------------------------------------------
+       Montserrat is the Kacific type system. No CDN <link> here: a
+       remote stylesheet fails under file://, which this page must
+       support, so Montserrat is used when installed locally and the
+       stack falls back to the system UI face otherwise. */
+    --font: Montserrat, "Segoe UI", system-ui, -apple-system, "Helvetica Neue",
             Arial, "Noto Sans", sans-serif;
+    --w-body:        300;
+    --w-ui:          500;   /* buttons, eyebrow labels */
+    --w-heading:     600;
+    --w-stat:        700;
+
+    /* Prose runs at the brand's airy 19px/1.5; the data table stays at
+       13-14px, because 19px rows would put the grid into permanent
+       horizontal scroll. Same family and weights, tighter scale. */
+    --fs-prose:      19px;
+    --fs-h1:         clamp(28px, 1.6rem + 2vw, 42px);
+    --fs-h2:         23px;
+    --fs-kpi:        clamp(38px, 2rem + 3vw, 58px);
+    --lh-heading:    1.1;
+    --lh-body:       1.5;
+
+    /* --- Shape ----------------------------------------------- */
+    --radius-pill:   38px;  /* buttons and pills only */
+    --radius:        5px;   /* cards and inputs */
+    --radius-sm:     4px;
+    --shadow:        0 1px 3px rgba(3, 78, 162, .08), 0 1px 2px rgba(3, 78, 162, .05);
+    --shadow-lift:   0 10px 30px rgba(3, 78, 162, .13), 0 2px 6px rgba(3, 78, 162, .07);
+    --ease:          .3s ease;
+
+    --shell:         1500px;  /* max content width */
+    --gutter:        clamp(16px, 3vw, 28px);
+
+    color-scheme: light;
   }
 
   /* ============================================================
@@ -38,14 +83,26 @@
      ============================================================ */
   * { box-sizing: border-box; }
 
+  html { scroll-behavior: smooth; }
+
   body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
     font-family: var(--font);
     font-size: 14px;
-    line-height: 1.5;
+    line-height: var(--lh-body);
     -webkit-font-smoothing: antialiased;
+    /* Taps on sort headers and pills should not wait 300ms or flash grey. */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3 {
+    font-weight: var(--w-heading);
+    line-height: var(--lh-heading);
+    letter-spacing: normal;   /* the brand adds no tracking */
+    text-wrap: balance;
   }
 
   /* One consistent, always-visible focus treatment. */
@@ -53,11 +110,15 @@
   button:focus-visible,
   input:focus-visible,
   select:focus-visible,
+  summary:focus-visible,
   th button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--blue);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
   }
+
+  /* Anchored sections must clear the sticky header when jumped to. */
+  [id] { scroll-margin-top: 84px; }
 
   .visually-hidden {
     position: absolute;
@@ -69,64 +130,241 @@
     border: 0;
   }
 
+  .skip-link {
+    position: absolute;
+    left: var(--gutter);
+    top: -60px;
+    z-index: 40;
+    padding: 10px 20px;
+    background: var(--card);
+    color: var(--blue);
+    font-weight: var(--w-ui);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-lift);
+    transition: top var(--ease);
+  }
+  .skip-link:focus-visible { top: 0; }
+
+  .shell {
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+  }
+
   /* ============================================================
-     HEADER + SUMMARY STRIP
+     SIGNATURE PILL BUTTON
+     White fill, blue label, inverting on hover — the most
+     recognisable interaction on kacific.com. Keep the inversion.
      ============================================================ */
-  .app-header {
+  .btn {
+    display: inline-block;
+    padding: 13px 30px;
+    background: var(--card);
+    color: var(--blue);
+    border: 1px solid var(--blue);
+    border-radius: var(--radius-pill);
+    font: var(--w-ui) 14px/1 var(--font);
+    text-transform: uppercase;   /* uppercase is reserved for button labels */
+    text-decoration: none;
+    cursor: pointer;
+    /* Explicit property list, never `transition: all`. */
+    transition: background-color var(--ease), color var(--ease), border-color var(--ease);
+  }
+  .btn:hover,
+  .btn:focus-visible { background: var(--blue); color: var(--card); }
+  .btn:active        { background: var(--blue-deep); border-color: var(--blue-deep); }
+
+  .btn--ghost { border-color: var(--line-strong); color: var(--ink-soft); }
+  .btn--ghost:hover,
+  .btn--ghost:focus-visible { background: var(--ink-soft); border-color: var(--ink-soft); color: var(--card); }
+
+  /* Inverted pill for the blue bands. */
+  .btn--on-blue { background: var(--card); border-color: var(--card); }
+  .btn--on-blue:hover,
+  .btn--on-blue:focus-visible { background: var(--blue-deep); border-color: var(--card); color: var(--card); }
+
+  /* ============================================================
+     TICKER + HEADER
+     ============================================================ */
+  .ticker {
+    background: var(--blue);
+    color: var(--card);
+    font-size: 12.5px;
+    font-weight: var(--w-body);
+    padding: 7px var(--gutter);
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+    text-align: center;
+  }
+  .ticker b { font-weight: var(--w-ui); }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     background: var(--card);
     border-bottom: 1px solid var(--line);
-    padding: 20px 24px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px var(--gutter);
   }
 
-  .app-header__brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  /* Clear space around the lockup is at least the height of the "K". */
+  .brand { display: inline-flex; padding: 6px 10px; }
+  .brand img { display: block; width: 151px; height: 54px; }
 
-  .app-header h1 {
+  .site-nav { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); }
+  .site-nav a {
+    /* The site sets nav links in Sky Blue; at 16px that is 3.64:1 and fails
+       AA, so nav text is Kacific Blue here and Sky is the hover. */
+    color: var(--blue);
+    font-size: 16px;
+    font-weight: var(--w-body);
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 2px solid transparent;
+    transition: color var(--ease), border-color var(--ease);
+  }
+  .site-nav a:hover,
+  .site-nav a:focus-visible { color: var(--sky); border-bottom-color: var(--sky); }
+
+  /* ============================================================
+     HERO — full-bleed blue band carrying the orbit arc motif
+     ============================================================ */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--blue-footer);
+    color: var(--card);
+    padding: clamp(40px, 6vw, 76px) 0 clamp(96px, 9vw, 128px);
+  }
+
+  /* Large circles bleeding off-canvas, echoing the orbit that sweeps
+     around the K in the logo. Decorative, so no markup for them. */
+  .hero::before,
+  .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .hero::before {
+    width: 620px; height: 620px;
+    right: -170px; top: -240px;
+    background: radial-gradient(circle at 30% 30%, rgba(93, 193, 212, .38), rgba(93, 193, 212, 0) 62%);
+    border: 1px solid rgba(255, 255, 255, .16);
+  }
+  .hero::after {
+    width: 900px; height: 900px;
+    right: -340px; bottom: -560px;
+    border: 1px solid rgba(93, 193, 212, .45);
+    box-shadow: inset 0 0 0 14px rgba(255, 255, 255, .05);
+  }
+
+  .hero .shell { position: relative; z-index: 1; }
+
+  .eyebrow {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: var(--w-ui);
+    color: var(--cyan);
+  }
+
+  .hero h1 {
     margin: 0;
-    font-size: 20px;
-    letter-spacing: -.01em;
-    color: var(--accent);
+    max-width: 20ch;
+    font-size: var(--fs-h1);
   }
 
-  .app-header .tagline {
-    margin: 0;
-    color: var(--ink-soft);
-    font-size: 13px;
+  /* Each fragment gets its own line at every width. The brand writes hero
+     copy as stacked declaratives, and a mid-sentence wrap breaks that. */
+  .hero h1 span { display: block; }
+
+  .hero__sub {
+    margin: 18px 0 0;
+    max-width: 56ch;
+    font-size: var(--fs-prose);
+    font-weight: var(--w-body);
+    color: rgba(255, 255, 255, .92);
+    text-wrap: pretty;
   }
 
-  .summary-strip {
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+  /* ============================================================
+     KPI CARDS — the headline numbers, lifted over the blue band
+     ============================================================ */
+  .kpi-wrap { margin-top: clamp(-104px, -8vw, -72px); position: relative; z-index: 2; }
+
+  .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin: 16px 0 0;
+    gap: clamp(12px, 1.4vw, 20px);
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .stat {
-    background: var(--bg);
+  .kpi {
+    position: relative;
+    overflow: hidden;
+    background: var(--card);
     border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
+    border-top: 4px solid var(--blue);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lift);
+    padding: 22px 24px 20px;
+    min-width: 0;
   }
 
-  .stat__label {
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--ink-faint);
-    font-weight: 600;
+  /* A faint orbit arc in the corner of every card. */
+  .kpi::after {
+    content: "";
+    position: absolute;
+    right: -70px; bottom: -90px;
+    width: 190px; height: 190px;
+    border-radius: 50%;
+    border: 1px solid var(--tint);
+    background: radial-gradient(circle at 40% 40%, var(--tint), rgba(241, 244, 250, 0) 70%);
+    pointer-events: none;
   }
 
-  .stat__value {
+  .kpi__label {
     display: block;
-    font-size: 22px;
-    font-weight: 650;
-    line-height: 1.25;
+    margin: 0;
+    font-size: 15px;
+    font-weight: var(--w-ui);
+    color: var(--ink-soft);
+  }
+
+  .kpi__value {
+    display: block;
+    margin: 6px 0 0;
+    font-size: var(--fs-kpi);
+    font-weight: var(--w-stat);
+    line-height: var(--lh-heading);
+    color: var(--blue);
     font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+    overflow-wrap: break-word;
   }
 
-  .stat--alert .stat__value { color: var(--bad-fg); }
+  .kpi__note {
+    display: block;
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--ink-faint);
+    min-height: 20px;   /* reserved so the cards do not jump when data lands */
+  }
+
+  /* The alert card is functional, not brand: it must not read as blue. */
+  .kpi--alert { border-top-color: var(--bad-fg); }
+  .kpi--alert .kpi__value { color: var(--bad-fg); }
+  .kpi--alert.is-clear { border-top-color: var(--ok-fg); }
+  .kpi--alert.is-clear .kpi__value { color: var(--ok-fg); }
 
   /* ============================================================
      LAYOUT
@@ -138,9 +376,7 @@
     grid-template-columns: minmax(0, 1fr) 300px;
     gap: 20px;
     align-items: start;
-    padding: 20px 24px 40px;
-    max-width: 1500px;
-    margin: 0 auto;
+    padding-block: clamp(28px, 4vw, 48px);
   }
 
   .card {
@@ -148,31 +384,31 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    /* Keeps the sticky header and the horizontal scroller inside the rounded corners. */
+    /* Keeps the sticky header and the horizontal scroller inside the corners. */
     overflow: hidden;
   }
 
   .card__head {
-    padding: 16px 18px;
+    padding: 18px 20px;
     border-bottom: 1px solid var(--line);
   }
 
   .card__head h2 {
     margin: 0;
-    font-size: 15px;
-    font-weight: 650;
+    font-size: var(--fs-h2);
+    color: var(--blue);
   }
 
   .card__head p {
-    margin: 2px 0 0;
-    font-size: 12.5px;
+    margin: 4px 0 0;
+    font-size: 13px;
     color: var(--ink-soft);
   }
 
   /* Provenance line under the table heading. */
   .source-note {
-    margin: 4px 0 0 !important;
-    font-size: 11.5px;
+    margin: 6px 0 0 !important;
+    font-size: 12px;
     color: var(--ink-faint);
     font-variant-numeric: tabular-nums;
   }
@@ -181,8 +417,8 @@
     color: var(--warn-fg);
     background: var(--warn-bg);
     display: inline-block;
-    padding: 3px 9px;
-    border-radius: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
   }
 
   /* ============================================================
@@ -193,35 +429,37 @@
     gap: 12px;
     flex-wrap: wrap;
     align-items: flex-end;
-    margin-top: 14px;
+    margin-top: 16px;
   }
 
-  .toolbar .field { flex: 1 1 200px; min-width: 0; }
-  .toolbar .field--narrow { flex: 0 1 200px; }
+  .toolbar .field { flex: 1 1 220px; min-width: 0; }
+  .toolbar .field--narrow { flex: 0 1 220px; }
 
   .field label {
     display: block;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 12.5px;
+    font-weight: var(--w-ui);
     color: var(--ink-soft);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
 
   input[type="text"],
   input[type="number"],
   select {
     width: 100%;
-    padding: 8px 10px;
+    padding: 9px 11px;
     font: inherit;
     color: var(--ink);
-    background: var(--card);
+    /* Native selects need both set explicitly or the OS picks its own. */
+    background-color: var(--card);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
+    transition: border-color var(--ease);
   }
 
   input::placeholder { color: var(--ink-faint); }
-
-  input:hover, select:hover { border-color: var(--ink-faint); }
+  input:hover, select:hover { border-color: var(--sky); }
+  input:focus, select:focus { border-color: var(--blue); }
 
   /* ============================================================
      TABLE
@@ -231,6 +469,7 @@
     overflow-x: auto;
     max-height: 620px;
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   table {
@@ -243,7 +482,7 @@
   /* Short columns stay on one line; the two free-text columns wrap instead of
      forcing the whole table into horizontal scroll on a normal desktop. */
   th, td { white-space: nowrap; }
-  td.wrap { white-space: normal; min-width: 128px; }
+  td.wrap { white-space: normal; min-width: 112px; overflow-wrap: break-word; }
 
   /* Header labels are the widest thing in several columns ("Reorder Level",
      "Unit Cost (USD)"). Let the label wrap so the column is sized by its data. */
@@ -253,15 +492,15 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: #eef2f7;
-    border-bottom: 1px solid var(--line-strong);
+    background: var(--tint);
+    border-bottom: 2px solid var(--sky);
     padding: 0;
     text-align: left;
-    font-weight: 650;
+    font-weight: var(--w-ui);
     font-size: 11.5px;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: var(--ink-soft);
+    color: var(--blue);
   }
 
   /* The whole header cell is the sort control. */
@@ -270,7 +509,7 @@
     align-items: center;
     gap: 5px;
     width: 100%;
-    padding: 10px 9px;
+    padding: 10px 8px;
     font: inherit;
     color: inherit;
     text-transform: inherit;
@@ -279,11 +518,12 @@
     border: 0;
     cursor: pointer;
     text-align: left;
+    transition: background-color var(--ease), color var(--ease);
   }
 
-  thead th button:hover { color: var(--accent); background: #e5ebf3; }
-
-  thead th[aria-sort] button { color: var(--accent); }
+  thead th button:hover { color: var(--blue-deep); background: var(--accent-tint); }
+  thead th[aria-sort] { background: var(--accent-tint); }
+  thead th[aria-sort] button { color: var(--blue-deep); }
 
   .sort-arrow { font-size: 9px; line-height: 1; opacity: .85; }
 
@@ -291,7 +531,7 @@
   td.num { font-variant-numeric: tabular-nums; }
 
   tbody td {
-    padding: 9px 9px;
+    padding: 9px 8px;
     border-bottom: 1px solid var(--line);
     color: var(--ink);
   }
@@ -299,11 +539,11 @@
   tbody tr:nth-child(even) td { background: #fafbfd; }
   tbody tr:hover td { background: var(--accent-tint); }
 
-  td.sku { font-weight: 600; font-variant-numeric: tabular-nums; }
+  td.sku { font-weight: var(--w-heading); font-variant-numeric: tabular-nums; color: var(--blue); }
   td.muted { color: var(--ink-soft); }
 
   .empty-row td {
-    padding: 34px 12px;
+    padding: 40px 12px;
     text-align: center;
     color: var(--ink-soft);
     background: var(--card) !important;
@@ -312,10 +552,10 @@
   /* Status pills */
   .pill {
     display: inline-block;
-    padding: 2px 9px;
-    border-radius: 999px;
+    padding: 3px 11px;
+    border-radius: var(--radius-pill);
     font-size: 11.5px;
-    font-weight: 650;
+    font-weight: var(--w-heading);
     white-space: nowrap;
   }
   .pill--in   { background: var(--ok-bg);   color: var(--ok-fg); }
@@ -329,50 +569,34 @@
   }
   tr.row-new td { animation: rowFlash 1.8s ease-out 1; }
 
-  /* ============================================================
-     BUTTONS
-     ============================================================ */
-  .btn {
-    font: inherit;
-    font-weight: 600;
-    padding: 8px 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
-    cursor: pointer;
-  }
-  .btn--primary { background: var(--accent); color: #fff; }
-  .btn--primary:hover { background: var(--accent-dark); }
-  .btn--ghost { background: var(--card); color: var(--ink-soft); border-color: var(--line-strong); }
-  .btn--ghost:hover { background: var(--bg); color: var(--ink); }
-
   .btn--danger {
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 6px;
+    font: var(--w-ui) 12px/1.4 var(--font);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
     background: var(--card);
     color: var(--bad-fg);
     border: 1px solid #f0c9c9;
     cursor: pointer;
+    transition: background-color var(--ease), border-color var(--ease), color var(--ease);
   }
-  .btn--danger:hover { background: var(--bad-bg); border-color: var(--bad-fg); }
+  .btn--danger:hover,
+  .btn--danger:focus-visible { background: var(--bad-fg); border-color: var(--bad-fg); color: var(--card); }
 
   /* ============================================================
      FORM
      ============================================================ */
-  .form-body { padding: 16px 18px 18px; }
+  .form-body { padding: 18px 20px 20px; }
 
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
   .form-grid .field--full { grid-column: 1 / -1; }
 
   .form-body .field label { color: var(--ink); font-size: 12.5px; }
 
-  .req { color: var(--bad-fg); font-weight: 700; }
+  .req { color: var(--bad-fg); font-weight: var(--w-stat); }
 
   .error-msg {
     display: none;
-    margin: 4px 0 0;
+    margin: 5px 0 0;
     font-size: 12px;
     color: var(--bad-fg);
   }
@@ -380,89 +604,336 @@
 
   input[aria-invalid="true"], select[aria-invalid="true"] {
     border-color: var(--bad-fg);
-    background: #fffafa;
+    background-color: #fffafa;
   }
 
   .form-actions {
     display: flex;
     gap: 10px;
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 18px;
+    padding-top: 16px;
     border-top: 1px solid var(--line);
+  }
+
+  /* Two pills have to share a 300px column, so they trade the hero button's
+     generous side padding for room — and never break their label in half. */
+  .form-actions .btn {
+    flex: 1 1 auto;
+    padding-inline: 16px;
+    white-space: nowrap;
   }
 
   /* ============================================================
      ANNOUNCEMENT REGION
      ============================================================ */
   .announcer {
-    /* Reserves its height so the layout doesn't jump when a message appears. */
-    min-height: 22px;
+    /* Reserves its height so the layout does not jump when a message appears. */
+    min-height: 24px;
     margin-top: 12px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: var(--w-ui);
   }
-  .announcer:empty { min-height: 22px; }
+  .announcer:empty { min-height: 24px; }
   .announcer .note {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
     background: var(--ok-bg);
     color: var(--ok-fg);
   }
   .announcer .note--removed { background: var(--warn-bg); color: var(--warn-fg); }
 
   /* ============================================================
-     RESPONSIVE — single column under 900px
+     FAQ — pale blue wash band
      ============================================================ */
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; }
-    .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .app-header { padding: 16px; }
-    .table-scroll { max-height: none; }
+  .faq {
+    background: var(--tint);
+    border-top: 1px solid var(--line);
+    padding-block: clamp(40px, 5vw, 68px);
   }
 
-  @media (max-width: 520px) {
+  .faq__intro { max-width: 60ch; }
+  .faq__intro h2 { margin: 0; font-size: var(--fs-h2); color: var(--blue); }
+  .faq__intro p {
+    margin: 12px 0 0;
+    font-size: var(--fs-prose);
+    font-weight: var(--w-body);
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .faq__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px clamp(16px, 2vw, 28px);
+    margin-top: 32px;
+    align-items: start;
+  }
+
+  .faq__item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--sky);
+    border-radius: var(--radius);
+    padding: 0 20px;
+    transition: border-color var(--ease), box-shadow var(--ease);
+  }
+  .faq__item:hover { border-left-color: var(--blue); box-shadow: var(--shadow); }
+  .faq__item[open] { border-left-color: var(--blue); }
+
+  .faq__item summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 0;
+    list-style: none;
+    cursor: pointer;
+    font-size: 15.5px;
+    font-weight: var(--w-heading);
+    color: var(--blue);
+  }
+  .faq__item summary::-webkit-details-marker { display: none; }
+
+  /* Decorative chevron; the summary text carries the meaning. */
+  .faq__item summary::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 9px; height: 9px;
+    margin-top: 3px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform var(--ease);
+  }
+  .faq__item[open] summary::after { transform: rotate(-135deg); }
+
+  .faq__item p {
+    margin: 0;
+    padding: 0 0 18px;
+    font-size: 15px;
+    font-weight: var(--w-body);
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  .faq__item p + p { padding-top: 12px; }
+  .faq__item code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .92em;
+    background: var(--tint);
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ============================================================
+     FOOTER — full-bleed blue band
+     ============================================================ */
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    background: var(--blue-footer);
+    color: var(--card);
+    padding-top: clamp(40px, 5vw, 64px);
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  /* One more orbit arc, sweeping out of the bottom-left corner. */
+  .site-footer::before {
+    content: "";
+    position: absolute;
+    left: -280px; bottom: -420px;
+    width: 760px; height: 760px;
+    border-radius: 50%;
+    border: 1px solid rgba(93, 193, 212, .35);
+    pointer-events: none;
+  }
+
+  .site-footer .shell { position: relative; z-index: 1; }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+  }
+
+  /* The lockup is built for light grounds, so on blue it becomes a white
+     knockout rather than sitting blue-on-blue. */
+  .footer-brand img {
+    display: block;
+    width: 168px; height: 60px;
+    filter: brightness(0) invert(1);
+  }
+
+  .footer-brand p {
+    margin: 16px 0 0;
+    max-width: 34ch;
+    font-size: 14px;
+    font-weight: var(--w-body);
+    color: rgba(255, 255, 255, .88);
+    text-wrap: pretty;
+  }
+
+  .footer-col h2 {
+    margin: 0 0 14px;
+    font-size: 13px;
+    font-weight: var(--w-ui);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--cyan);
+  }
+
+  .footer-col ul { margin: 0; padding: 0; list-style: none; }
+  .footer-col li + li { margin-top: 9px; }
+
+  .footer-col a,
+  .footer-col span {
+    font-size: 14px;
+    font-weight: var(--w-body);
+    color: rgba(255, 255, 255, .92);
+    text-decoration: none;
+    transition: color var(--ease);
+  }
+  .footer-col a:hover,
+  .footer-col a:focus-visible { color: var(--cyan); text-decoration: underline; }
+
+  .footer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    justify-content: space-between;
+    margin-top: clamp(32px, 4vw, 52px);
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, .22);
+    font-size: 12.5px;
+    font-weight: var(--w-body);
+    color: rgba(255, 255, 255, .82);
+  }
+  .footer-bar p { margin: 0; }
+  .footer-bar .tagline { color: var(--cyan); }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .kpi-wrap { margin-top: -72px; }
+    .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .faq__list { grid-template-columns: minmax(0, 1fr); }
+    .table-scroll { max-height: none; }
+    .site-header { position: static; }
+    [id] { scroll-margin-top: 16px; }
+  }
+
+  @media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+    .kpi-wrap { margin-top: -64px; }
     .form-grid { grid-template-columns: minmax(0, 1fr); }
+    .footer-grid { grid-template-columns: minmax(0, 1fr); }
+    .brand img { width: 132px; height: 47px; }
+  }
+
+  /* Every transition and the row flash are decoration; drop them when the
+     reader has asked the OS for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
-  <!-- ============================================================
-       HEADER + LIVE SUMMARY
-       ============================================================ -->
-  <header class="app-header">
-    <div class="app-header__brand">
-      <h1>LogiTrack Inventory</h1>
-      <p class="tagline">Warehouse stock positions across the regional network</p>
-    </div>
+  <a class="skip-link" href="#main">Skip to Content</a>
 
-    <ul class="summary-strip">
-      <li class="stat">
-        <span class="stat__label">Total SKUs</span>
-        <span class="stat__value" id="stat-skus">0</span>
-      </li>
-      <li class="stat">
-        <span class="stat__label">Units in Stock</span>
-        <span class="stat__value" id="stat-units">0</span>
-      </li>
-      <li class="stat stat--alert">
-        <span class="stat__label">Below Reorder Level</span>
-        <span class="stat__value" id="stat-low">0</span>
-      </li>
-      <li class="stat">
-        <span class="stat__label">Warehouses</span>
-        <span class="stat__value" id="stat-warehouses">0</span>
-      </li>
-    </ul>
+  <!-- ============================================================
+       TICKER + HEADER
+       ============================================================ -->
+  <p class="ticker">
+    <b>Kacific Network Operations</b> · Asia-Pacific distribution · Stock positions
+    are read from <code>inventory.csv</code> each time this page loads
+  </p>
+
+  <header class="site-header">
+    <a class="brand" href="#main" aria-label="LogiTrack Inventory, a Kacific service — go to the dashboard">
+      <img src="data:image/png;base64,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" width="151" height="54"
+           alt="" fetchpriority="high">
+    </a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="#overview">Overview</a>
+      <a href="#inventory">Inventory</a>
+      <a href="#add-record">Add Record</a>
+      <a href="#faq">FAQ</a>
+    </nav>
   </header>
 
-  <main class="layout">
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="shell">
+      <p class="eyebrow">LogiTrack Inventory</p>
+      <h1 id="hero-heading">
+        <span>Every SKU.</span>
+        <span>Every warehouse.</span>
+        <span>One live view.</span>
+      </h1>
+      <p class="hero__sub">
+        Stock positions across the regional distribution network — Singapore, Johor,
+        Jakarta and Bangkok — with reorder alerts derived the moment the data lands.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--on-blue" href="#inventory">View Inventory</a>
+        <a class="btn btn--on-blue" href="#add-record">Add a Record</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       KPI CARDS — headline numbers, lifted over the blue band.
+       Every figure covers the whole dataset, never the filtered view.
+       ============================================================ -->
+  <div class="kpi-wrap">
+    <div class="shell">
+      <h2 class="visually-hidden" id="overview">Network Overview</h2>
+      <ul class="kpi-grid" aria-labelledby="overview">
+        <li class="kpi">
+          <span class="kpi__label">Total SKUs</span>
+          <span class="kpi__value" id="stat-skus">—</span>
+          <span class="kpi__note" id="stat-skus-note"></span>
+        </li>
+        <li class="kpi">
+          <span class="kpi__label">Units in Stock</span>
+          <span class="kpi__value" id="stat-units">—</span>
+          <span class="kpi__note">Held across <span id="stat-warehouses">0</span> warehouses</span>
+        </li>
+        <li class="kpi kpi--alert" id="kpi-low">
+          <span class="kpi__label">Below Reorder Level</span>
+          <span class="kpi__value" id="stat-low">—</span>
+          <span class="kpi__note" id="stat-low-note"></span>
+        </li>
+        <li class="kpi">
+          <span class="kpi__label">Stock Value</span>
+          <span class="kpi__value" id="stat-value">—</span>
+          <span class="kpi__note" id="stat-value-note"></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <main id="main" class="shell layout">
 
     <!-- ==========================================================
          INVENTORY TABLE
          ========================================================== -->
-    <section class="card" aria-labelledby="table-heading">
+    <section class="card" id="inventory" aria-labelledby="table-heading">
       <div class="card__head">
         <h2 id="table-heading">Inventory Records</h2>
         <p id="result-count">Showing all records</p>
@@ -472,7 +943,7 @@
           <div class="field">
             <label for="search">Search SKU, product or supplier</label>
             <input type="text" id="search" placeholder="e.g. PKG-, resistor, Meridian…"
-                   autocomplete="off">
+                   autocomplete="off" spellcheck="false">
           </div>
           <div class="field field--narrow">
             <label for="filter-category">Category</label>
@@ -502,7 +973,7 @@
     <!-- ==========================================================
          ADD RECORD FORM
          ========================================================== -->
-    <aside class="card" aria-labelledby="form-heading">
+    <aside class="card" id="add-record" aria-labelledby="form-heading">
       <div class="card__head">
         <h2 id="form-heading">Add Inventory Record</h2>
         <p>Status is derived from quantity and reorder level.</p>
@@ -515,7 +986,7 @@
 
             <div class="field field--full">
               <label for="f-sku">SKU <span class="req" aria-hidden="true">*</span></label>
-              <input type="text" id="f-sku" name="sku" autocomplete="off"
+              <input type="text" id="f-sku" name="sku" autocomplete="off" spellcheck="false"
                      placeholder="e.g. ELC-2210">
               <p class="error-msg" id="err-sku"></p>
             </div>
@@ -541,19 +1012,22 @@
 
             <div class="field">
               <label for="f-qty">Quantity <span class="req" aria-hidden="true">*</span></label>
-              <input type="number" id="f-qty" name="qty" min="0" step="1" placeholder="0">
+              <input type="number" id="f-qty" name="qty" min="0" step="1" placeholder="0"
+                     inputmode="numeric" autocomplete="off">
               <p class="error-msg" id="err-qty"></p>
             </div>
 
             <div class="field">
               <label for="f-reorder">Reorder Level <span class="req" aria-hidden="true">*</span></label>
-              <input type="number" id="f-reorder" name="reorder" min="0" step="1" placeholder="0">
+              <input type="number" id="f-reorder" name="reorder" min="0" step="1" placeholder="0"
+                     inputmode="numeric" autocomplete="off">
               <p class="error-msg" id="err-reorder"></p>
             </div>
 
             <div class="field field--full">
               <label for="f-cost">Unit Cost (USD) <span class="req" aria-hidden="true">*</span></label>
-              <input type="number" id="f-cost" name="cost" min="0" step="0.01" placeholder="0.00">
+              <input type="number" id="f-cost" name="cost" min="0" step="0.01" placeholder="0.00"
+                     inputmode="decimal" autocomplete="off">
               <p class="error-msg" id="err-cost"></p>
             </div>
 
@@ -567,7 +1041,7 @@
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn btn--primary">Add Record</button>
+            <button type="submit" class="btn">Add Record</button>
             <button type="button" class="btn btn--ghost" id="clear-form">Clear</button>
           </div>
         </form>
@@ -575,6 +1049,162 @@
     </aside>
 
   </main>
+
+  <!-- ============================================================
+       FAQ
+       ============================================================ -->
+  <section class="faq" id="faq" aria-labelledby="faq-heading">
+    <div class="shell">
+      <div class="faq__intro">
+        <h2 id="faq-heading">Frequently Asked Questions</h2>
+        <p>
+          How the dashboard reads its data, how stock status is worked out, and what
+          happens to the records you add.
+        </p>
+      </div>
+
+      <div class="faq__list">
+        <details class="faq__item" open>
+          <summary>Where does this data come from?</summary>
+          <p>
+            From <a href="inventory.csv" translate="no">inventory.csv</a> in the same
+            folder as this page. The file is re-read on every page load, so refreshing
+            picks up any edit you have made to it.
+          </p>
+          <p>
+            The line under “Inventory Records” always names the source it actually used,
+            so you never have to guess which copy you are looking at.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>Why does it sometimes warn about the data source?</summary>
+          <p>
+            Browsers block <code translate="no">fetch()</code> on pages opened straight
+            from disk over <code translate="no">file://</code>. When that happens the
+            dashboard falls back to a copy of the CSV embedded in the page and tells you
+            so, rather than showing an empty table.
+          </p>
+          <p>
+            To read the live file instead, serve the folder — for example
+            <code translate="no">python -m http.server 8000</code> — and open
+            <code translate="no">http://localhost:8000/</code>.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>How is stock status calculated?</summary>
+          <p>
+            It is derived from the row, never stored. Quantity of 0 is
+            <b>Out of Stock</b>; quantity at or below the reorder level is
+            <b>Low Stock</b>; anything above it is <b>In Stock</b>.
+          </p>
+          <p>
+            Sorting the Status column ranks by urgency rather than alphabetically, so the
+            rows that need attention come first.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>Do the KPI cards follow my filters?</summary>
+          <p>
+            No — and that is deliberate. The four cards always describe the whole dataset,
+            so a search or a category filter never makes the network look healthier than
+            it is. The count above the table is the one that tracks your filters.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>Are the records I add saved?</summary>
+          <p>
+            Not permanently. Adding or deleting a record changes it for this session only,
+            and a reload restores the file. Edit
+            <a href="inventory.csv" translate="no">inventory.csv</a> to make a change stick.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>Can I search and sort at the same time?</summary>
+          <p>
+            Yes. Search, the category filter and the column sort are independent and
+            compose freely. Every column header is a button — click it to sort, click
+            again to reverse, and reach it with <kbd>Tab</kbd> like any other control.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>A row in my CSV did not appear. Why?</summary>
+          <p>
+            Rows with a missing field, a non-numeric quantity or cost, or a SKU that
+            already appears earlier in the file are skipped so bad values never reach the
+            table. The source line reports how many were dropped.
+          </p>
+        </details>
+
+        <details class="faq__item">
+          <summary>How do I add a warehouse or a category?</summary>
+          <p>
+            Both lists are constants in the page script —
+            <code translate="no">CATEGORIES</code> and
+            <code translate="no">WAREHOUSES</code>. Add an entry there and it appears in
+            the filter and in both form dropdowns automatically.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="shell">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAB+CAYAAABs8HmYAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAACHMSURBVHgB7Z19ehNXsv+rTosMd/KmWUGUFSBWgPj/h5GfSZg4+QH2CjArwF4BZgWy4SbOQO61nCwAsQLEClBWEM0zmcQJ6lO36ugFWerW2zmtluz6PMMEC7lfTnd/u05VnSoEJXdqtVrxgw8/LCFRiSwWAbCESEU00af8WZEQikBQGvqV0pRNtgZ/w/7fsUU2/hcRtgGoZflnE1H7mzt3mqAoylJBUJZCX1whhjIilA2azywQCyyWWFSLkC8tEWiy9o0IdEzQ7Jz92tzZ2WmDoijBUeHNgNrxSekDeFfpCywBlGG6lbpyEFDTsBBbolcixne3vmyAoijeqPB6IpZs4epH5ciJLN5gt0BlBSzY7EBokKVTMtRQN4WiLIYK75y8F1qqojHXWGQrcHlpOSGm+PTrf/yjDoqizIQK7wyI6+Av2GGhxdsgboOLbNEuCoL4g+sqwooyHRXeFJ4dv6g4qxaNiG0JlHlwljDE7/a3trZaoCjKOVR4hxiIrTH318SqbXHgrs1BvDYStAlxkIXwPnWsSz897f2vUsn9P58n3wRyriXIAhZgG9ujb7buHIKiKI5LL7wrLLYtvjhNEVMWrp8NUEtSvQAKrbOzdjuLVC/xX19l/zUZLLIil0ScxY/dE+cy+NGy1u6rACvKJRVeJzAfffKAxaWSe3Csa602LNmf+b9NG0Hzz//8p7VqObQDUUbn4y6DwWsLirEKsHLpuVTCK9ZtIcJHuYltNwDVdAsV0DTQRs2trc0WrCnvxXihDA8VYOXScuGFd2DdWtqGZQfJBkJLp2LNbl3wBQjHx8clgKjCInx7jnzmFth3NzUIp1wmLqzwOhEofMB+W9pdpu+Wg11Njmy9QsL62SVfdvvdP3+o8gtP0vDuT/suAh38/tuv+7pMWbkMXDjhzcWd0FvNhVSor7PrICu6LokPq2TMgyl+YbZ+aeeizwwU5cII79IFtye2f/z+66FaabPz7fPnZYxxd6IVbHBv68u/74OiXFDWXniXKrgqtsEQVxBBYW+CAKvvV7mwrK3wLk1wJUAW05MoovodLQoTnCkCrK4H5UKydsLrHlTDDypMD9h44Za80r4+9MthkgAT0cOvv/ryABTlgrA2wju06CG7LAW2bsnaI8lIUMHNB8mE4JvyMYym/qnfV7lArIXwfnv8fNtE5nGWgivuhLOzXw/Ud7saHB+/2GOxfXTuQxVf5YKw0sLrcnGjK7XM/LgquCuNu/7myksYtn5VfJULwEoK79Bqsz3IAhXctaF2clL8y1nn4JzvV8VXWXNWTnhdtoLBGmSxvFcFd20ZdT1owE1ZZ1ZGeMXK/a+/fvKIgINnoVHBvRC4wBtCbeDrt3RTg6DKOrISwiurmQyZE8jCyiU4PPv93w9VcC8GI35fXWShrCUGcub75ycPWHRfQ2jRlTxcsYi++mJHRffi4ESWxRZEdOWekeCroqwZuVm8LoD24ccnwTMWXC4u7av/72IzbPmqv1dZN3IR3qwCaHwy9d9/+7dauJcE56IC81JqcbIVfF1dDsq6sHRXg7gWWHTP52b6IlYuxJtf/eOLTRXdy8M3Ujsjtg9BmnWqy0FZI5Zm8WaVtaBWrjJINdMsB2VNWIrwij/OYlQ3aK5BKNSXqwxx/PwHmUXB1p0vboKirDiZuxr6QZCQomvJvoH43XUVXWVA/G6H/7/M1m8FFGXFydTiHQp+BCtuQ2SffP3VnfCLLJS157vvX0hni9tq9SqrTmYW73c//O/9oKIrq88s7qjoKmn0Z0Bq9SqrTibCK6KLsT0MaOm2LFgOnPz9EBRlEjHts9X7ABRlhQkuvMcv/ueRE91AOH+ufXfzG227o8yAZDUQYluyaEBRVpSgwiuiG7SUo6WjP3//T0UT45W5iO3RB1c/rIKirCjBhFcWRgQWXel3tq35ucq8iNWLiGrxKitLEOEVny5RHC61qyu6e6AoC0KGGqAoK4p3Olmv7sJLCIWKrhIIySFXN5WyingJb68n2utg2QsquoqiXAIWdjUMyvKp6CqKoszFQsLrUnVGu7/6oKKrKMolYiHhlSpjoKKrKIqyEHMLr+TqhirtKHUXVHQVRblszBVc6/l130IIEBqZFzOp1qoQR+HzOaO4BfWdBvhSrZX4+CoQgihu8zHVQVGUlacw6xeHelyFoNUr45cpkY1Osqm/Fu3E4Em1VuHjq/HxlcATcrUsQCtyKcqaMLOrgUxhD0L4dV2VsSW05GZhg4yIIW6AB2bj2SMW3UDBSTyyJr7O1m4LFEVZC2ayeL89fr6NgPchBLF9uIykdmNNJmv1CbC5sMhVa8WICifs3K5AAAzBw3c/3dVi8IqyZkwV3q6LwTyCALgi5lt3DmEJGDA3yLWfDQsiLVYlre9aACqBJ861YOLNuL6jFdsUZQ2Z6moI5mJgsVhaEXMOWrHoliELEE9hTti18CCYawGx0XMtqOgqypoy0eKV1j1IgVwM7NeFJRHFhTJgeGtXiNudxsxfdq4FtnKJgrg9EGi/c3pvDxRFWWsmCq8hcwIhcIskllmsxFYzaSdH1IDGjGUqq7Wyy6qAIFkLbcOuhU6IFDZFUXIn1dUgATUI5GJY+iIJxBuQAYTwapbv9VwLryGE6BK8EdeCiq6iXBxSLV4TKqAG8UNYJmxpgg20nHkEY2zDwsR9Fw1deYxktyEACPgk/unu6jT35PODOKoWkMqE5jOiYT86thGhRZZe2Siur1R6mzvuQsVwYBMNXOMZWImPv7ewhoIvsOEX5c2k849uPd3ml7fHc0VH9sf7e1O/VnVtj8omjspyvkRYzuI8Z4FdlQ/5Hq4PHVvFuCDzgttDaMSn98KvARgaM4Nyf+Cn3fsESxAYJGolCm8wa5fg8Ouv/rHU1VQRD1xGTevbE61ODuh1A2i2BJ6IayHqpoodwiogGRmx2QaLt3lsiyQDTDQyzCT/K/ODUeVxeAy3jhpxZHdyE+BqrcrHXOUH5wbKi7jv85f/8EFiBhkvvc230s+ZKrznEiyKMZMDqnKdKLrPhofEFIruAhFkdq6zEEedc8dsrOExWFxb+GX/M4SgJ7QFa6oW8Db2jTV0KaND90kGGGwkCm8oaxfo3T4sHcrKv5t604trAbttj7ytil6q2E27ChajBAdjc8CCe3/uIUWU9Lm3tPFsz/54dzn3Qf8FgfyCsF3hyeYdnA6L3Jv0f/RzgcXQSb4HZaZlo0csHqszO4LknHdEc0Ne2osyddY5jZGXk9NXWDLsshwT3pDWbi7V/w3f3Bm84PkmGk8j69/wgYoGdVehdXb5Zs2/z1w/OOi5pJnHZq9Qrb3K0kftpvAG5eVXXv5TNILB5Bmepwts0sId93JECJN9FJbzMRGxMq3X4qH2QveRe04LD9xzagPVD/dAVr6OCe9aW7uyTDijgWW/ZWNkX6VCHNXZZ3cNArBSq9AGbpMwY0mxu6caEJrBohQoIWXwtl2AtOXkRooh+b0UkgO7TsxwFUWXtaRTH7FO/XLrac7FS33BtWIYUe6CK/RfoOeEV/qnwRpbu+I/ggzo+e0GFz3a+G+eqtgDFt1QroXVWYUWWHQd7HaACgtEI5AlL9Y4FR57Wk/BmWSVsrVV8ZnUJoiYI+KgYVY567502jDq3/XKZ0+cdaYQ3XpW5fvjcYiVooFxL9BzwhsZ2IYQ5OLb9fcfpW/3vbVmNp7yxbRhXAuyCg07myvhWujB/i8+v/BZIYUilDsBrF4pMNT1py92neVFZ4CO0Nh6xFPXs2X50j1dYKMi9h6/nHVJVzRRvMvXppn1fei7jH9s1pmEGA5UqHnVQ+Hnkiyd8rg0s3KRDa5YsFq7Yu1+9UXmJR/HkECQjX6BLDCw4/wyAV0LbhXaLKlBS8SJGrggYXDYWnnCQbbFX1ierp1epsj+u5/urYY7JxDRxlN5ZkuwILGJP78wle26ridZtLTQbK0/+1zGcvyBxWshqizc+XIYoiPIBz//0QQohmKE0etQrgVj4p1VWxDhpmYZiW6PxSP63UDfy0XHf6UyRUIihfS9AnaTUt/Wi/czoQVBqNvTe5uwJAZaayITwkEvq9QakANZlYEU2NUg029/n2e3wM3NlVuFJg8w0sJJ7bOAUrSoUpt7DMWf7utz7lkxLbhgRJ7dS4ZdaOuM70xNXkAxxkudpTuL17kZCCrgCZGdu3JXKLIqAxkKWYXWOV2hVWh9ui6aicImNyaKtUl+L5+oWKjEAPWZf8GlYNlD8EBcOrlXcvMtyp/6ovbMWV+g0t7CZDQGIdxjvRfzUuMsTnjJXCmHSH8sGDiEPJAykDajMpCerNwqtBFc9bQpPkK5MXlGsetbDJ+se7nPJrzd7AqvIk3OksnZj96LrnucB53GaUFJz4DdXJX2fHifKbMQki1iAa6Pfu4WLvm6x5A1K4cXc8/VEKRsYevOnTu5WBZRqIaRGcADfMgBnUNYQcRa4Lt64rXvW4xI2ABPeFu3Z/1uiPrFaCCX7JphCG0FfEhfkFHxmYG41LfGcqy8AM/neA4zi3mIQDC7GHK5R3rCi/6ResrTX7Ra+ZzDsEGyG1WPVi7BXSyxaTeuc4/0LMZ4llSe6ZRm8fOKJQMBUtp8e+OFQFxg4AGfQ6IxI8VcwI9XsDT8DDt+gTZGP+ulPfrFXaTMa06+/0Lt5KSIf8be03SycW7+3azKQAbD4mGhWvt5ZYJqLhouyeXpdKfpQz5puUE3nrbAUxCjj6MqT50PIf3Yit2VRr7Qae4BNU8X2OjCnWHQ4G2fnHV+6d43G09nnoHMigE87YymDYZ2iXRXqPrP0iPMKwMLCoWzTpkHBnxBtPkEMDIsAxkSYn/llWrt5rv8Az3FadP4fvrV+Of0yqu6lmBcWtlh2j/ztLQaouV96hR9iUSey4RTsw78ax4IRQy5OrEHmZFlvb7L+BOaD0Sx2Q1RkyPPGZGJ0IQISrVzKYgDvTXw60HRSrBIrM0ccQVVZgimJVmLIfy8U7NnTJi6A6vgZvB2gaVnHaxkIFkYHXffZfxjzQdc6iP6W+o5uhkEE2QtM0JuVpybcq0P3ehuTuLrgmk4WdgmpV/FUuDcn1Lq+YslF6D1/aSaCUvFtwxkStZBljnrPqSWgfRAykAO/+z6KQaA0LyBHDGuIr8nZG2OJ7GaaWQTKBlbOFlkMYEXPOWbJ5iWSDfXsQWeGHEnJBPqWi4xcJSCuMB8Cn5PyDrwDdhlyHgZSApbBtI7S6SHFB2CHDFEIfw82II88EypmQQFEJg0ZBVX9HGgRqKz0M2jnLgyTc63Yzp7MAWSoJUnaS979omWIABJUfBlY7JIoRIkYLeixsaomLnKaV5Q0hgEed7Tiw4th0IQB7u1LciBrKZcLmHbdDYNuwV82pRMBLFS2Hj6uPPjvWx70s0TTJth9Q77eZvegY1u7nBmSzRj6LQgZ3yzDtLLQPrW9aXT+Mf7S3JVeHb7zihAuswc5jQkj7cEnrAfJ5eT4P0GqRQ2vl1yvqpIgkwImZ2b5Pg6v2uGSIcMmHKNpWjPrD7RQH7eYm8qPgKGGetVqG3s6atOTz309IEvMdvD9/nMKkCKYH+GnAlSkCwXAgViEulFkyX1CzHOtGKR+F3Nrae7kAHddeyT+3C58pTz5BeH8/NWRj8bbYy4IC3IG9+6BBJxT8O7b9uSsj08XSITKqe1wBfEbMrHzkEBglBowZLJsvL+cDRZRCmq1nbAoyX1NKT6WVQ9+iWu3w+X0C3BtGll8gjrnSg+nDvLImbfm2fba55VVPg/B+c+5AeNNp41cf0CpufIrNNChn3bQpNVDrOVAvbdWdxas74Wr/MfZUBCwnZc3zl0aVZZYvHgSuL0ewFmCKY5kKQV+9t5/0xLSZuNNMvNu8JdaekZIyP4Zh2kdVow3mUgKcSMYkY867+k5TCLGwn98smJMPcXuwnjw+yUYMlk5d8dS9juIWlWGYuvLLAIkuMbosDMEigWEqbkbNEc+GaUmI+jbciLMFPs9GXCPiyzDCT61X+ZVDkNsbPvo1soaxdyXshk+ErnGt1biAxTakYTtodxOa6U6fruou8Ci25PuNVfQi3YpEIv7EN2wT4PeJr6KK8HyzfBf3Jxcr97follIL1ymJNmncOI+w/9Ot0U+To9hhwxUi8WPLFL7uSZYRnI9rRAU/zT3W3nK8uO7uq2BabLswTTVom0MpFyDciAT5qde4FFt55uL1+APV1gmJq/65ezPkXMQuLrEpllVRkbQVKvYfEMDXaz8fPy2jsQuiAFsPQGDHq+pXHJPjXPyvupm53NB2ZN56ax0WvMzrIsmU8KL5OKP6fCVoZXz6k8QCyntX239XsHhY2jIr/kFg2klPgWqbEAA2w8bYcwMPokVuDqk1HWwTJbo/uSVQ7zKNKuJ4IIptWUTsMtZBIjZ+Np8AVTSPiQjbTUF0PBtXUBz51ANv7W9B1iNv7dWW9Ong7bau1mlgss3E1x679r8U//f/q0e4ZuDT3hCWrxBDj34qS27+LaYT9wg33fNc99Ba3ENVaBq0+GWQcupuEjZlHcnEXMghB4mXAq/BzGAJv8gt7zeEE7Qj/H01IjCzxKLV/rEdEuL0qYYRlIO0+xb35ARHwjil5ntWwZ0G7zdKhlf7w7MajXa3teSvv3oZVpLQhIdPvZS99catutXtVI+3f3EMo4W7MHEKZymS9pVmkkPmu/RynNzeBbBrK9tFrQ3TKQi0PzZ1642Eu1dpjpStM5mCVtz5gACdW8oxIsiazKQE6KJqfCg2uQBS3D1W1ugcWE1W0STGPRnTgD4KnfwyzyN4nsK/AEaYa273zs8Y/3t2MTf857zTK4ORWa2BLdL4UqrXBLRjUPMiE3l4gYQj/e+5z9QDuU8yKaWdL2jKuj6y8cxePjFxVYAlmVgWSBW6jCmitsjnGm9RZEfJPaB3Wb/U1fmRbX7y4ehJjApAyQmUGszBxIHBJgnnU/JMw0yJnIxKwD4+ffTS/c4hmwW+Iy4axymGclrt87FAFGV8ifjnIR4RnS9twCCor9K06x1bUcd0NWy4Q9bk5ZYOEZhZ9Ot31QZfCzBNOADib+Dkd9Oxl22WXfbDOEtS9+3rl+Qaybn+4d2NO7150VbOJNHosnklgvYkyQ3Qwk9aHKMuvgci0TDvIyFdeKvKRFhI2Jr8uLenCPZCzGs6Ttddu7AzV8W3f3LNEDyJgrbroZnjPPh1Wi8Fertcwti877v7amjcVZlgIkcHDjSrV23TfBxOs4xQruPkhjY381g1Sys3SXTdPn3pw0BlcS2jDNQ7ysovC8H74fvJ7PMwhPr91WYnAxi3skniFtzz0y0vDy6p+xd+GIs9/+/bednXzLrSmKoqw6ztWws7nZBvQvHv3B1Y92QVEURZnIoEgO+0CegCeRgXXqf6YoipILA+H944Oo4RsoIcDysrIbFEVR1pWB8Iq7wcbkbfVC5LeCRFEU5aJzrh7vn1cLB97pQQQVtXoVRVHSOSe8avUqiqJkz1gHilBW73ffv9AMB0VRlATGhFesXrL+nRYQ8VGtlm8LFkVRlFUksefa1199eRAgr7f4X3/9OLMGkYqiKOtKarNLC/ahf3oZVNXloCiKcp5U4f3mzp1mKJfD8+fPl1evV1kZoo2jOoTqnLwC+1k1pFyotK+Jbh29nPQ9GZ/o1jO/CmdLJumamo2nb/NuUjlGtVZ0LYTmZGJ791Auh5jMyfHxcQmUC0mq8KH5tACQvZ9/WftZhAUfzGm4fnJA22g6+yaykyvj8fjwd9cr3pJwTVehyHkCRVygIpuZ9oWzK9Em+JdRK5EpnGiw7YKyysKXPws9mNMglAazeBrXd+rvApVSVJbHVOF1BXTsO+8uCwhY/stfP3qp4qsoobBaCXBNmbmS6rfspzVgXvr2FyOg5h+//XpTy0deAHgaHcXmRLoF84u1RSRCYJ70u6u6nmwIT8hKayKeFotVTNSMI7sz1j5HpuS28KD/PeLtIRFv697htMPIZD/sSyxYs2sBb8sU1zWFZbdbjPH+8DYL/+9ZBQzd5u/xZ7Q7vO8oLpQJ4ZGzeKXQOUgTxIRjSt9v4nlEt5/WJFfe/UDUAoPt+PTeJkwaH0tHhPjZ+fOG/dFOuPzdkxg7+xEVHvO2y2PfY5dS/9/czwj10THpfa/C33tERKX+/vjT+lj/wJHrIecrrhPL+0A+juFecdHGU4pNfHN4u2n7d91ZEKqD43S93PBo9Dr3z5fHfHsw5unnVOJ910bO/Ug6Fcc/3purKvVUi7ePBNsgpk3wpG/5qs/3AlDfaWNk90V0LdGR/D2Ozlff5wDtYwMWP+AHxvAffhhe8Y36erTdDwv4ASKVIxNvSlcJYzoPRbTMraczZcWw6D4KuR8DkQSj2rI9eajk+/yzvGjOpUjKlN/yI8niVO3v23T7hrWl06yIlnzPjRP/mSa6rt04772/LYrwlD97e2XIh478sHf7qNEr2aYRkZiCtIjih/1v/e3yy+IIkE7OdTVxJ0RVFsKaiN4VE19HQ0+kg/rw8SHZV/JvbpyJ/uWOeXScWchkG278euMs4tr1TZ+/HvI5b2vH7U/uoTg6pBTXlbFRje+p08F5EOHY/lnM+RpXZP+yb9elJMIjHtbHyefrrml7sE25zu46nKd77vCmf+5837yR44EFKMzz5a2tLxvHx893IDKPfSxfEV8wV0R8b7qeb8raIhYJWw1tvhGbSZ1sxUrsnN7fG+qc0eTv3zAfR2xh9DqW8MNAFm/Y03ufx/3tAjT4Idmhbtv6g2nHIQ0GQ+5HOopYeN/xw/lRq7WHEUZvx/bNFjGL7M2hTg99n2s7rtbkgYVZuvxGrpErtTo/3dsdPg+zcVS0MT9zAK4ThWyLP6vI3+MZuwfzTPMXfoGMbRcoks4zjeHvitjKPnrfPXx/fGaPxas+Ms67PM7XzCdipcNe/0Npu+OOtfezjDO/3J7w798YbFMyFCzetyyMlseu990WX49dEuFLsCEjgifvfrp3MNSpYttldnwcVeP+dntt34d/T/5Nxoy3Wx4934jwSLY5OCe+HyKI3opI96+bvDDIndfd8TFcoLX8zBZvn62tO4cWbIjOuiUR3+/++c+1SnNR5qNrnZ2HXRI/s7U1eHGbOConNRt1N708fLOkECX0QuP9vAm6nzRrVdwIQdrrUDWpy6419lDcOeABW2djnYaRTHPgshgihjgxWIdoriVdT3Fj8PBNPT4cb29USmqF3hO7VtI23iU2w7SvaNbxwfHsjrFt1sUNik2Ko1L/I57ZlCH52tRhAeayePuI24Gt1esinOCX4sF+mujk+MX/7G19+XfvnGFlbWid+8k9DHjN+S6TmTq7QunRO057nv3ww1DqDB9btVZl31+FH+pPB58RZIcxn6KltPPwiq0gOR/rOcQVwtZ4MWV/Y0gjyzhBEOMobvF2rp37UHy3cbSNBgafo0Vphjn4/cgJ29wBwsTx4RnPZyP7L/H+q8P75xO4Mbz/KdschcfJthb83TEWEl5BXATiKiBz5WSWt91ELO0d//OHbcmeUNfDZYV+5mnnq4R/eMU+xhYEI30/neh9e3Wz8fQxi1WZgzjsG4zbfWuNKNqGi0X4LKO+r9rwlN4C+6HjlvscDc9uh15iE2B35MIzalkswn7gmkHigCsO9k9k/gYrwsLCK/RE8vp33//AAQt4AH6I6+H1d9+/2HcLN5TLA/FDZuAt+yAPIUtm3Q8HstDCdnx6d+xB5cg6ZIa1/+Kpd5IQlsCTlGBVCebL0Zfvjm0nigvnrEEOVu3Kwqv49N7Oue/delriz4da1WObZxPF5OOl4hxpAkWOsf1r8JMByWh42KnfPxz+Evtjt8ELk3SsC7245vbxJvH1V1/s8k0jg9wCPzgaiY/Z+n2rWQ/5IOO+yNgTFBa2nEwUi6+xOhoZd1TD5X3PsR/5ezvhOyXIEPbDNtkHPda3kKfkg3S0RUnabsFG/Nm4zzv9AImj+CYhJmOrhGZ4OyyEPLMY/fURkZIMGJdqN3o9uuNcggTEfTD6GUoamKHBbAVd4H/cYkafVFjCJpK9NvqxuzYLEER4BQm69RZaNMAfsX7fHj//oaYCnD2yqEW6htROTooyi5nb3cOWGvsmb7hlwwsIZTe4hc3o40JtIG7io+PpvpGUsECk7KeYsJ8m38fFcylmkr8aFx7D/EgH77bb1hTh5kDNAVuAJanB4Max+6fCv/8YIuPXoMAMbVeQDA+Abf68PusmMLIHLHIPBilhvbHjY75tTWcwS0Vj6vy9++eWkfP+xmbFEsRCbJhPCi+Hrke5EEdyTK3kg4AHg7oT/f2DCwg2+l/h4P+ppBeev8bPHvFx3oAFsVF8yGNVHhtDhIWaPgQTXsE9tHe+uBnI+pVX5LYKcHY8Y7H99vjF3gcffliSVEG3SnEB4sjuSlSZxeskgkKl/7nLXkhCpvx03iKJsbPD0RfJCX0rifIihIa/ZE18HaawyH5k+739vO3t5+bgSywIBiXXFe/Ld9wfKjxmC22fRu/rSNwXE/yRTlziHdmWEb/nJPHl79puDnKFx+EX+WMsi73Bnbh+fqFD0rml0c0igX0E+7nbbve8T4wsjKifd7vwdWzyqyJxu+7FZeIdMiy+Mia8LZ6hlt3YDWUmyLGyJXvk7gfZ18bTX2TRA+/vCQ67BKB7Pfi43gxd95fsYjggl6c8ch489ryvTTLwaGT/m8P7lxfYyDbfSo63LKAYHTN3vmljFg19t39PIFT7YyjnZGU8FtC6uVZbzIMIJU8/95BvOAgFwiHE7/Y1ALc4Irb8thXro43UqetYKsryyUx4+zhLNbpSS8oXXBgW4E5MR3fZSgNlKiK2hYK5QR37OY9d84/ffz3UJduKkh+ZC28f13lYmmCGFGCZeli7b9i/o5bbe8RnW7j6UTlCqiKa2zxtOuUpXn1LX1SKshIsTXj7ZCTAciYNG9ujyyrCteOT0l+wU2XXzm0eWykgIoXsn6jYKsrqsXTh7ZOJD7gPi7AU0ogJmhfVHSHV4tBihSPIUpGrn2LTBH75nJ39p66uBEVZXXIT3j7dbIWoQsY88F4Bl4QLIrE1TPRqXYXYWbPmzzKHYHtCy+NErnydrCmvE9HpH7/9u6FiqyjrQe7CO4yz4mLcZStY8u1KkBXOIrZv+C8tEePO2a/NVRCt9wJrSmzFls6JbB/Jk45dqk1D3QiKsp6slPAOI75g4uAQoLmRiSU8SrfamtRPbceW3ki6FaBtxda0TUTtP+Mr7Z2tzRYsgAiq/LcAnVJkbJGsLJPEkonMZ0hUJDk/lCLQiStrWt3gGDTVhaAoF4OVFd5h+u4ItgBvU1eES5AnIso0U1WiEsxDT/zFGlehVZSLy1oI7yiuDVEM0pakAgavLcUiDg2LLBG0gOwrEVkbQdN1+VAU5cKzlsKbhPMPi2+UbMWg+cy6Wr8rIcgtSe2yblkrtgCxhTZqbi3otlAUZf25MMKbxrHzr3ZKZFAa6ZXYyiyKb1WCV/Lv8jO+r5pUmrK5Vv8v5Iovu6wC95mN7c+mV2RZrFfDPmEVV0VRkvg/Y2xnD3VTDisAAAAASUVORK5CYII=" width="168" height="60"
+               alt="Kacific — the heart of broadband" loading="lazy">
+          <p>
+            LogiTrack is the stock-visibility view over the Kacific regional
+            distribution network across the Asia-Pacific.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h2>Dashboard</h2>
+          <ul>
+            <li><a href="#overview">Network Overview</a></li>
+            <li><a href="#inventory">Inventory Records</a></li>
+            <li><a href="#add-record">Add a Record</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h2>Data</h2>
+          <ul>
+            <li><a href="inventory.csv" translate="no">inventory.csv</a></li>
+            <li><a href="#faq">Source &amp; Fallback</a></li>
+            <li><a href="#faq">Status Definitions</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h2>Network</h2>
+          <ul>
+            <li><span>Singapore Hub</span></li>
+            <li><span>Johor DC</span></li>
+            <li><span>Jakarta Depot</span></li>
+            <li><span>Bangkok Cross-dock</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bar">
+        <p>© 2026 Kacific Broadband Satellites International Ltd. Internal tool — seed data, not a system of record.</p>
+        <p class="tagline" translate="no">the heart of broadband</p>
+      </div>
+    </div>
+  </footer>
 
   <!-- Fallback copy of inventory.csv, used only when fetch() is blocked
        (i.e. when this page is opened directly from disk over file://).
@@ -818,6 +1448,13 @@ SPR-5147,Pallet Wrapper Turntable Motor,Spare Parts,Bangkok Cross-dock,72,30,396
   });
   var qtyFmt = new Intl.NumberFormat('en-US');
 
+  /* KPI cards carry the headline figure, so stock value is compacted
+     ($3.1M, not $3,148,204.55) — the exact number belongs in the table. */
+  var kpiMoneyFmt = new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD',
+    notation: 'compact', maximumFractionDigits: 1
+  });
+
   /* Status is always computed, never stored — quantity is the only truth. */
   function getStatus(record) {
     if (record.qty === 0) return 'Out of Stock';
@@ -1000,22 +1637,59 @@ SPR-5147,Pallet Wrapper Turntable Motor,Spare Parts,Bangkok Cross-dock,72,30,396
     renderSortIndicators();
   }
 
-  /* Summary reflects the whole dataset, not the filtered view. */
+  /* The KPI cards reflect the whole dataset, not the filtered view — a search
+     must never make the network look healthier than it is. */
   function renderSummary() {
     var totalUnits = 0;
     var belowReorder = 0;
+    var outOfStock = 0;
+    var stockValue = 0;
     var warehouses = {};
+    var categories = {};
 
     inventory.forEach(function (record) {
       totalUnits += record.qty;
+      stockValue += record.qty * record.cost;
       if (record.qty <= record.reorder) belowReorder++;
+      if (record.qty === 0) outOfStock++;
       warehouses[record.warehouse] = true;
+      categories[record.category] = true;
     });
+
+    var warehouseCount = Object.keys(warehouses).length;
+
+    /* Em dashes rather than zeros while the CSV is still in flight: a hard 0
+       on these cards would read as a real, alarming figure. */
+    if (isLoading) {
+      $('stat-skus').textContent = '—';
+      $('stat-units').textContent = '—';
+      $('stat-low').textContent = '—';
+      $('stat-value').textContent = '—';
+      $('stat-warehouses').textContent = '0';
+      $('stat-skus-note').textContent = 'Loading…';
+      $('stat-low-note').textContent = '';
+      $('stat-value-note').textContent = '';
+      $('kpi-low').className = 'kpi kpi--alert';
+      return;
+    }
 
     $('stat-skus').textContent = qtyFmt.format(inventory.length);
     $('stat-units').textContent = qtyFmt.format(totalUnits);
     $('stat-low').textContent = qtyFmt.format(belowReorder);
-    $('stat-warehouses').textContent = Object.keys(warehouses).length;
+    $('stat-value').textContent = kpiMoneyFmt.format(stockValue);
+    $('stat-warehouses').textContent = warehouseCount;
+
+    $('stat-skus-note').textContent = Object.keys(categories).length +
+      ' categories · ' + warehouseCount + ' warehouses';
+
+    $('stat-low-note').textContent = belowReorder === 0
+      ? 'Every SKU is above its reorder level'
+      : outOfStock + ' of them are out of stock';
+
+    $('stat-value-note').textContent = 'At cost · ' + moneyFmt.format(stockValue);
+
+    /* A clear board should read green, not red — the card is a signal. */
+    $('kpi-low').className = 'kpi kpi--alert' + (belowReorder === 0 ? ' is-clear' : '');
   }
 
   /* Says where the rows came from, and warns when the CSV could not be read. */

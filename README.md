@@ -1,13 +1,14 @@
 # LogiTrack Inventory
 
-A single-file warehouse inventory dashboard: filterable, sortable stock table with
-derived stock-status, live summary stats, and an inline add/delete form. No build
-step, no runtime dependencies, no framework — the entire app is one `index.html`
-(design tokens + CSS, markup, and one IIFE of ES5-flavoured vanilla JS).
+A single-file warehouse inventory dashboard in Kacific livery: four big KPI cards, a
+filterable and sortable stock table with derived stock-status, an inline add/delete
+form, an FAQ and a footer. No build step, no runtime dependencies, no framework, and
+no network requests — the entire app is one `index.html` (design tokens + CSS,
+markup, one IIFE of ES5-flavoured vanilla JS, and the logo inlined as a data URI).
 
 **Live demo:** https://alfredang.github.io/kacificlogistics/
 
-![The LogiTrack Inventory dashboard: summary stat cards across the top, a sortable stock table with derived In Stock / Low Stock badges, and the add-record form in a side panel](docs/screenshot.png)
+![The LogiTrack Inventory dashboard: four large KPI cards — Total SKUs, Units in Stock, Below Reorder Level, Stock Value — lifted over a blue Kacific band, above a sortable stock table with derived In Stock / Low Stock badges and the add-record form in a side panel](docs/screenshot.png)
 
 ## The data is placeholder seed data
 
@@ -33,6 +34,24 @@ python -m http.server 8000
 
 then open <http://localhost:8000/>. Here `inventory.csv` is fetched with
 `cache: 'no-store'`, so edits to the file show up on reload.
+
+## Branding
+
+The page follows Kacific's visual identity: the exact logo blue `#034EA2`, the
+`#07529E` band used for the hero and footer, Montserrat with a system fallback, pill
+buttons that invert on hover, and the orbit-arc motif from the logo repeated as
+off-canvas circles behind the hero, the KPI cards and the footer.
+
+Two constraints shape how that is implemented, and both are deliberate:
+
+- **No Google Fonts `<link>`.** A remote stylesheet fails under `file://`, so the
+  font stack is `Montserrat, "Segoe UI", system-ui, …` — Montserrat when it is
+  installed, a clean fallback otherwise.
+- **The logo and favicon are inlined as `data:` URIs.** The page stays genuinely
+  self-contained; `tools/test.js` asserts that nothing is loaded from the network.
+
+Status colours are **not** brand blues. `In Stock` / `Low Stock` / `Out of Stock`
+have to read as traffic lights at a glance, so they stay green/amber/red.
 
 ## The data duplication that will bite you
 
@@ -105,8 +124,10 @@ The script in `index.html` is split into numbered sections (`1. CONSTANTS` …
 - **`CATEGORIES` / `WAREHOUSES` constants feed every `<select>`** — the filter
   dropdown and both form dropdowns — through `populateSelects()`.
 - **Filters and sort are view-only state** and never touch `inventory`;
-  `getVisibleRecords()` returns a fresh filtered+sorted array. Summary stats reflect
-  the whole dataset, not the filtered view.
+  `getVisibleRecords()` returns a fresh filtered+sorted array. The KPI cards reflect
+  the whole dataset, not the filtered view — a search must never make the network
+  look healthier than it is. The count above the table is the one that follows the
+  filters.
 - **Event handling is delegated** on `#header-row` and `#table-body`, because rows
   and their buttons are rebuilt on every render.
 - **Vanilla ES5-flavoured JS inside one IIFE with `'use strict'`** — `var`, function

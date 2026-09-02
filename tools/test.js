@@ -258,7 +258,12 @@ async function main() {
     [...document.querySelectorAll('input,select')]
       .every(el => !!document.querySelector('label[for="' + el.id + '"]')));
   check('no storage APIs', !/localStorage|sessionStorage|indexedDB/.test(html));
-  check('no external resources', !/<script src|<link |https?:\/\//.test(html));
+  // Nothing may be fetched from the network, or the page stops working offline
+  // and over file://. Inline data: URIs (the logo, the favicon) and prose that
+  // merely mentions a URL are fine; a remote src/href/@import/url() is not.
+  check('no external resources',
+    !/(?:src|href)\s*=\s*["'](?:https?:)?\/\//i.test(html) &&
+    !/@import|url\(\s*["']?https?:/i.test(html));
 
   // ------------------------------- load path: fetch blocked (file://)
   console.log('\n== load path: fetch blocked (file://) -> embedded fallback ==');

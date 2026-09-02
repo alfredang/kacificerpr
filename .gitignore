@@ -23,4 +23,5 @@ Thumbs.db
 
 # Local agent tooling, not part of the project
 .claude/
+skills-lock.json
 .mcp.json
