@@ -9,6 +9,9 @@ package manager, no dependencies, no network access. Open it and it runs.
 
 **[Live demo →](https://rajjosg530-max.github.io/logitrack-inventory/)**
 
+![The LogiTrack Inventory dashboard: a summary strip of headline totals above the
+inventory table and the add-record form](screenshot.png)
+
 ## Run it
 
 ```powershell
@@ -102,7 +105,9 @@ The design is deliberately single-theme (light). Every colour is painted explici
 ```
 index.html                            the entire application
 inventory.csv                         static snapshot of the seed data
+screenshot.png                        dashboard screenshot used in this README
 CLAUDE.md                             working guidance for Claude Code
+.mcp.json                             Playwright MCP server (project scope)
 .claude/commands/publish-to-github.md  /publish-to-github project command
 ```
 
