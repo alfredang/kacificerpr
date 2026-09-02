@@ -12,6 +12,10 @@ package manager, no dependencies, no network access. Open it and it runs.
 ![The LogiTrack Inventory dashboard: a summary strip of headline totals above the
 inventory table and the add-record form](screenshot.png)
 
+Styled to the **Kacific Broadband Satellites** brand system — brand blue `#034EA2`,
+Montserrat, uppercase pill buttons and the orbital-curve motif. The logo is embedded as a
+`data:` URI and the type falls back to Segoe UI, so the file stays self-contained offline.
+
 ## Run it
 
 ```powershell

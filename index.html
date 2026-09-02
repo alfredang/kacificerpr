@@ -6,27 +6,46 @@
 <title>LogiTrack Inventory</title>
 <style>
 /* ==========================================================================
-   1. DESIGN TOKENS
+   1. DESIGN TOKENS — Kacific Broadband Satellites brand system
+   Core blue, supporting blues and neutrals come from the brand palette. The
+   green/amber/red status colours further down are SEMANTIC, not brand, and
+   are deliberately left alone.
    ========================================================================== */
 :root {
-  --accent:        #1D4ED8;
-  --accent-dark:   #12306E;
-  --accent-soft:   #EEF3FF;
+  /* Brand core */
+  --k-blue:        #034EA2;   /* the wordmark blue — headings, primary actions */
+  --k-blue-mid:    #358CCB;   /* borders and large type only — never small text */
+  --k-blue-footer: #07529E;
+  --k-blue-bright: #0071BC;
+  --k-blue-pale:   #C5D3E9;   /* body copy on blue grounds */
+  --k-tint:        #F1F4FA;   /* the pale blue-grey section wash */
+  --k-ink:         #111111;
+  --k-muted:       #6B6B6B;   /* darkened from brand #929292 to clear AA on tint */
 
-  --bg:            #F4F6F9;
+  /* Aliases, so the rest of the sheet reads by role rather than by hue. */
+  --accent:        var(--k-blue);
+  --accent-dark:   #023A79;
+  --accent-soft:   #EAF1FB;
+
+  --bg:            var(--k-tint);
   --card:          #FFFFFF;
-  --border:        #E4E7EC;
-  --text:          #101828;
-  --muted:         #667085;
+  --border:        #DDE4F0;
+  --text:          var(--k-ink);
+  --muted:         var(--k-muted);
 
   --ok-fg:         #067647;  --ok-bg:   #ECFDF3;  --ok-br:   #ABEFC6;
   --warn-fg:       #B54708;  --warn-bg: #FFFAEB;  --warn-br: #FEDF89;
   --bad-fg:        #B42318;  --bad-bg:  #FEF3F2;  --bad-br:  #FECDCA;
 
-  --radius:        12px;
-  --shadow:        0 1px 3px rgba(16, 24, 40, .10), 0 1px 2px rgba(16, 24, 40, .06);
-  --font:          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                   "Helvetica Neue", Arial, sans-serif;
+  --radius:        6px;       /* brand card radius */
+  --radius-pill:   38px;      /* brand pill-button radius */
+  --shadow:        0 1px 3px rgba(3, 78, 162, .10), 0 1px 2px rgba(3, 78, 162, .06);
+
+  /* Montserrat is the brand face. It is NOT loaded from a CDN — this file has
+     to work offline — so it renders where installed and falls back to Segoe UI,
+     a close enough grotesque that the layout does not shift. */
+  --font:          'Montserrat', 'Segoe UI', system-ui, -apple-system,
+                   'Helvetica Neue', Arial, sans-serif;
 }
 
 /* ==========================================================================
@@ -40,15 +59,18 @@ body {
   color: var(--text);
   font-family: var(--font);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, p { margin: 0; }
+/* Brand signature: headings run tight at 1.1 against body copy at 1.5. */
+h1, h2, h3 { margin: 0; line-height: 1.1; font-weight: 600; }
+p { margin: 0; }
 
 /* One consistent, clearly visible focus treatment for every interactive element. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--k-blue);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -66,62 +88,103 @@ h1, h2, h3, p { margin: 0; }
 
 /* ==========================================================================
    3. HEADER + SUMMARY STRIP
+   A solid brand-blue band. The orbit curve — the logo swoosh, and the brand's
+   signature motif — is drawn as two outsized ellipses clipped by the band, so
+   the header reads as an orbit rather than as a rectangle.
    ========================================================================== */
 .topbar {
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  position: relative;
+  overflow: hidden;
+  background: var(--k-blue);
   color: #fff;
-  padding: 22px 24px 24px;
+  padding: 26px 24px 30px;
 }
 
-.topbar__inner { max-width: 1440px; margin: 0 auto; }
-
-.brand { display: flex; align-items: center; gap: 12px; }
-
-.brand__mark {
-  width: 38px; height: 38px;
-  flex: 0 0 38px;
-  display: grid; place-items: center;
-  background: rgba(255, 255, 255, .16);
-  border: 1px solid rgba(255, 255, 255, .28);
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -.5px;
+.topbar::before,
+.topbar::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.brand h1 { font-size: 20px; font-weight: 650; letter-spacing: -.2px; }
-.brand p  { font-size: 13px; color: rgba(255, 255, 255, .78); }
+/* The sweeping orbit arc across the band. */
+.topbar::before {
+  top: -190px;
+  right: -140px;
+  width: 640px;
+  height: 420px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  transform: rotate(-12deg);
+}
 
-/* Live counts. Auto-fit keeps all four on one line on desktop, 2x2 on mobile. */
+/* A second, wider orbit echoing the first. */
+.topbar::after {
+  bottom: -300px;
+  left: -120px;
+  width: 780px;
+  height: 460px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  transform: rotate(8deg);
+}
+
+.topbar__inner { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; }
+
+.brand { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+/* The reversed (white) lockup, embedded as a data URI so the page stays a
+   single offline file. Never recoloured, stretched or rebuilt from live text;
+   the width is left auto so the file's own 350x126 ratio is preserved. */
+.brand__logo {
+  height: 44px;
+  width: auto;
+  flex: 0 0 auto;
+  /* Brand rule: clear space of at least the height of the "K" on all sides. */
+  margin: 6px 6px 6px 0;
+}
+
+.brand__text {
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, .34);
+}
+
+.brand h1 { font-size: 21px; font-weight: 600; letter-spacing: -.2px; }
+.brand p  { font-size: 13px; font-weight: 300; color: var(--k-blue-pale); margin-top: 3px; }
+
+/* Live counts. White cards on the blue band — the brand sits cards on white,
+   which also lets the figures run in brand blue at full contrast. */
 .summary {
-  margin-top: 18px;
+  margin-top: 22px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
 }
 
 .stat {
-  background: rgba(255, 255, 255, .12);
-  border: 1px solid rgba(255, 255, 255, .18);
-  border-radius: 10px;
-  padding: 12px 14px;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px 16px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
 }
 
 .stat__label {
   font-size: 11px;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: .07em;
-  color: rgba(255, 255, 255, .76);
+  color: var(--k-muted);
 }
 
 .stat__value {
-  font-size: 22px;
-  font-weight: 650;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--k-blue);
   font-variant-numeric: tabular-nums;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
-.stat--alert .stat__value { color: #FEDF89; }
+.stat--alert .stat__value { color: var(--warn-fg); }
 
 /* ==========================================================================
    4. LAYOUT
@@ -129,7 +192,7 @@ h1, h2, h3, p { margin: 0; }
 .layout {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 22px 24px 48px;
+  padding: 26px 24px 48px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   align-items: start;
@@ -149,8 +212,8 @@ h1, h2, h3, p { margin: 0; }
   border-bottom: 1px solid var(--border);
 }
 
-.card__head h2 { font-size: 15px; font-weight: 650; }
-.card__head p  { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.card__head h2 { font-size: 17px; font-weight: 600; color: var(--k-blue); }
+.card__head p  { font-size: 12.5px; font-weight: 300; color: var(--muted); margin-top: 4px; }
 
 /* ==========================================================================
    5. TOOLBAR (search + category filter)
@@ -161,7 +224,7 @@ h1, h2, h3, p { margin: 0; }
   gap: 12px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--border);
-  background: #FCFCFD;
+  background: var(--k-tint);
 }
 
 .field { display: flex; flex-direction: column; gap: 5px; }
@@ -169,8 +232,8 @@ h1, h2, h3, p { margin: 0; }
 
 label {
   font-size: 12px;
-  font-weight: 600;
-  color: #344054;
+  font-weight: 500;
+  color: var(--k-blue);
 }
 
 input[type="text"],
@@ -181,16 +244,16 @@ select {
   font: inherit;
   color: var(--text);
   background: #fff;
-  border: 1px solid #D0D5DD;
-  border-radius: 8px;
+  border: 1px solid #C7D2E4;
+  border-radius: 4px;
   transition: border-color .12s ease, box-shadow .12s ease;
 }
 
-input:hover, select:hover { border-color: #B4BCC9; }
+input:hover, select:hover { border-color: var(--k-blue-mid); }
 
 input:focus, select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, .14);
+  border-color: var(--k-blue);
+  box-shadow: 0 0 0 3px rgba(3, 78, 162, .16);
   outline: none;
 }
 
@@ -228,7 +291,7 @@ thead th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #F9FAFB;
+  background: var(--k-tint);
   border-bottom: 1px solid var(--border);
   padding: 0;
   text-align: left;
@@ -236,7 +299,7 @@ thead th {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .05em;
-  color: #475467;
+  color: var(--k-blue);
 }
 
 /* Header cells are buttons so sorting is reachable by keyboard, not mouse only. */
@@ -255,7 +318,7 @@ thead th {
   cursor: pointer;
 }
 
-.th-btn:hover { background: #F2F4F7; color: var(--accent); }
+.th-btn:hover { background: #E2EBF7; }
 
 /* Numeric columns are right-aligned in the body, so their headings match. */
 .th-btn--num { justify-content: flex-end; }
@@ -264,7 +327,7 @@ thead th {
 
 .th-arrow {
   font-size: 9px;
-  color: var(--accent);
+  color: var(--k-blue-bright);
   visibility: hidden;
 }
 
@@ -272,22 +335,22 @@ th[aria-sort] .th-arrow { visibility: visible; }
 
 tbody td {
   padding: 11px 14px;
-  border-bottom: 1px solid #F2F4F7;
-  color: #344054;
+  border-bottom: 1px solid #EDF1F8;
+  color: #333A45;
 }
 
-tbody tr:nth-child(even) { background: #FCFCFD; }
+tbody tr:nth-child(even) { background: #FBFCFE; }
 tbody tr:hover           { background: var(--accent-soft); }
 
-.cell-sku  { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.cell-sku  { font-weight: 600; color: var(--k-blue); font-variant-numeric: tabular-nums; }
 .cell-name { white-space: normal; min-width: 180px; color: var(--text); }
 .num       { text-align: right; font-variant-numeric: tabular-nums; }
 .cell-date { color: var(--muted); font-variant-numeric: tabular-nums; }
 
-/* Status pill */
+/* Status pill — semantic traffic-light colours, deliberately not brand blue. */
 .pill {
   display: inline-block;
-  padding: 2px 9px;
+  padding: 2px 10px;
   border-radius: 999px;
   border: 1px solid transparent;
   font-size: 12px;
@@ -308,38 +371,55 @@ tbody tr:hover           { background: var(--accent-soft); }
 
 /* Newly added row briefly flashes so the user can find it in a long table. */
 @keyframes flashRow {
-  0%   { background: #D7E3FF; }
+  0%   { background: #D3E2F5; }
   100% { background: transparent; }
 }
 tr.is-new { animation: flashRow 1.8s ease-out; }
 
 /* ==========================================================================
-   7. BUTTONS
+   7. BUTTONS — brand pill shape, uppercase labels
+   The asymmetric 13px/10px vertical padding optically centres uppercase text,
+   which has no descenders. Keep it.
    ========================================================================== */
 .btn {
-  padding: 9px 14px;
-  font: inherit;
-  font-weight: 600;
-  border-radius: 8px;
+  padding: 13px 26px 10px;
+  font-family: inherit;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background .12s ease, border-color .12s ease;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
 }
 
-.btn--primary { background: var(--accent); color: #fff; }
-.btn--primary:hover { background: #1A44BD; }
+.btn--primary {
+  background: var(--k-blue);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+.btn--primary:hover { background: var(--accent-dark); }
 
-.btn--ghost { background: #fff; color: #344054; border-color: #D0D5DD; }
-.btn--ghost:hover { background: #F9FAFB; }
+/* Secondary: the brand outline variant, filling solid on hover. */
+.btn--ghost {
+  background: #fff;
+  color: var(--k-blue);
+  border-color: var(--k-blue-mid);
+}
+.btn--ghost:hover { background: var(--k-blue-mid); color: #fff; }
 
 .btn--danger {
-  padding: 4px 10px;
-  font-size: 12.5px;
+  padding: 4px 12px;
+  font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
   color: var(--bad-fg);
   background: #fff;
   border: 1px solid var(--bad-br);
-  border-radius: 6px;
+  border-radius: 999px;
   cursor: pointer;
 }
 
@@ -367,8 +447,8 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 .form__actions {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
-  padding-top: 15px;
+  margin-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
@@ -385,7 +465,7 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 .toast {
   margin: 0 0 14px;
   padding: 9px 12px;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 500;
   border: 1px solid;
@@ -395,12 +475,58 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 .toast--info { color: var(--bad-fg); background: var(--bad-bg); border-color: var(--bad-br); }
 
 /* ==========================================================================
-   10. RESPONSIVE
+   10. FOOTER BAND
+   Closes the brand's white -> tint -> solid blue section rhythm.
+   ========================================================================== */
+.sitefoot {
+  position: relative;
+  overflow: hidden;
+  background: var(--k-blue-footer);
+  color: #fff;
+  padding: 26px 24px;
+}
+
+/* The orbit motif again, mirrored, so the page opens and closes on a curve. */
+.sitefoot::before {
+  content: "";
+  position: absolute;
+  top: -260px;
+  right: -160px;
+  width: 720px;
+  height: 420px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 50%;
+  transform: rotate(10deg);
+  pointer-events: none;
+}
+
+.sitefoot__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sitefoot__brand { font-size: 14px; font-weight: 500; }
+.sitefoot__note  { font-size: 12.5px; font-weight: 300; color: var(--k-blue-pale); }
+
+/* ==========================================================================
+   11. RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; padding: 18px 16px 40px; }
-  .topbar { padding: 18px 16px 20px; }
+  .layout { grid-template-columns: 1fr; padding: 20px 16px 40px; }
+  .topbar { padding: 20px 16px 24px; }
+  .sitefoot { padding: 22px 16px; }
   .table-wrap { max-height: none; }
+}
+
+@media (max-width: 620px) {
+  .brand__text { padding-left: 0; border-left: 0; }
 }
 
 @media (max-width: 520px) {
@@ -416,8 +542,10 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 <header class="topbar">
   <div class="topbar__inner">
     <div class="brand">
-      <div class="brand__mark" aria-hidden="true">LT</div>
-      <div>
+      <!-- Kacific reversed lockup, embedded so the page stays one offline file. -->
+      <img class="brand__logo" alt="Kacific Broadband Satellites"
+           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKwAAABCBAMAAAA4USAZAAAAMFBMVEVHcEz///////////////////////////////////////////////////////////9EPuwCAAAAD3RSTlMAYN8fQKYQgJFwv+8wUM8djoSWAAAFkUlEQVRYw61YX2xTVRw+47a37bZKl21sGJKNyeaL2S6bkiBGSjaiqGS3Gygi0jLngAS1/mcYXBODqyaEEgaG8LAa48t8oKj4wEs7NYs+GPaw+Arii28N3ZCx4q7n9zvn3nO6dd3a21+yu3PPPfc753zn+33n3BKSN0407L+TNIz2b0/7Sdni9z5DxD9/lgf0+GtGbnwdsg+qnjKWxT3N9lCvcqgbr27aRu+f2fNl0j7u0SQntFbUVdcnbeLuZqDXN+RWe4PGZhuoTyNodt+yJVLeM14uGfUYoi5cyvNIGcmUSoMHeV3Ir38l+FhpqI50AVTaaYnDHSmISkhnWymozwJqZnrlBkprCaheJPbzQk06YyVSsKVgE6V4FpyY+qtYSkPR/oJOsNokncU62duA+uNqrZQiyVVBsmvQZZE7RSUMdg1Z9EZxsOfWNliiFIXqWuNgi4xecEOt3KhKB4X9j5HXBYGVULC1NWIqhLE4jlkB2giC79iaQRNFWGRFzIoHkP9QiNgiATj4gRXRbx5S701y+NLDJThw4K6TYMaTtXdMgvlm+A6AsDp5U1ac+mlLwCw29rXQaCduem0l6sUWFvoAvaD97TmMFW2M2rtSthkxJS3b2biYzHf8kEPW0et9tgC4CLfoZZbK5xNecZtR28wQqrAu9aKghXP0EDVnHngekJv0OkeCJuz0OYRSrIoI8cI/n8gLI4tUXDM5umWKg1yhhUANjVrywsTEhA4LvDjTQyN0kN7HsMHj0KBGQ9VmQ2K+xgI6RErOFZSya6l3VltZJOY1b95U8bcs2WJ8I3IlC/3ybck0XBiiVsEIhb7hHhs0y4Zg9pm0Tp7SHrcZKjRSIQTDhJhyWjBQWoAGhiVKmPi/UmuMRVMGimFMMfLXSb15sAuo+QuY3IDCkIRKI8j0IGTLtctigOoojfe9uPhCiPfITrNxAkpzTTmzvCpAKgXsfcvg42jyzXhN8Nr1KPUms3EcSomg1C+TbViWbYchduEK2DSakCZ4Ky6txyzWYE758FlasElD2slRtpkdhpUANI9o/u3EsQUlS2PjpzgLYqljHbIQiJQNzG3ZwrHdosPo7+rqRD2OSJmHxKmWyVWjMIIrwaJs7zJ0o81MXCYNHDMnQcWE9VpcelDZMNef8nGLALPEzQ7lJissQm7hwJjvmttaQyYMEO+8tU2lLc7Y7JvNZIvwxOVugoR+Dyvkd+PwK63hV+EkcZ/KQIMnuG7jwqtAbAPcp5xch0nsxGXmYOgRJPsda5q9bIk95igSfJ0SkmwpzwoD8I9zK+c9b09LNM8hmN86xMJibeWeAqO8aTHv6EGTo6VJdLfpmhrmY3ALq6ruheo6cgQSFmsZj7ugMa7lr/hiihMzX/YTDTKaDZUdVl3LgbmECHLtlzl2SIZVxvDkuPoKxzT2z5f72ZkiurjTw9ZqCSsoeLpVp5fCOtA1SUHYTnmXyfspeKjyTFilE4r6FD95UhvyH6W2lXL6SfTU0CA9+g+mXKP6gWH6KPQLOfkh368gqf4u9JH9mZNEGp8PkVjs9G61e6yh+zghgWE62kOOug+6okMXJo+ReNw11D3WuN2nV/LXfl7l00EJO4keqE8Rny9Qr208X0vnr4adFLZfqUt5Ff+uhq1E1yu2bTxfR/rDbvmIca0QrJvoEZVy64sQtzaJsBEXhd3n6NG8J/b6XHS0t530UR2JhJ3me0+BGPrzL9cU/QtQEn6Lhijsc8Pe4bO1xEPI5bNeSvYZh6aOVo9edh2IRD+mj2aIfjKa8yGd+Sgf6ku2vkrQgt9fVn+k215OONAqX1/S2VeX7OaaA8+m1zdJP4pefKUM32rKo+w3wC9m6HdZ1x+NfTculMcc3jos/VrZOlY+1xlsOHiHmnr7/nenbCL9D6zPsYhLaDJcAAAAAElFTkSuQmCC">
+      <div class="brand__text">
         <h1>LogiTrack Inventory</h1>
         <p>Regional stock positions across the South-East Asia distribution network</p>
       </div>
@@ -557,6 +685,16 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
   </aside>
 
 </main>
+
+<!-- ==========================================================================
+     FOOTER BAND
+     ========================================================================== -->
+<footer class="sitefoot">
+  <div class="sitefoot__inner">
+    <p class="sitefoot__brand">Kacific Broadband Satellites Ltd &mdash; the heart of broadband.</p>
+    <p class="sitefoot__note">LogiTrack Inventory &middot; internal warehouse stock dashboard &middot; in-memory data, resets on reload</p>
+  </div>
+</footer>
 
 <script>
 'use strict';
