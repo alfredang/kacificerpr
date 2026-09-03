@@ -14,7 +14,7 @@ export default async function TasksPage() {
   const tasks = await listTasks();
   return (
     <div className="space-y-5">
-      <Alert tone="info">The scheduler is driven by <code>GET /api/cron/tick</code> every 5 minutes (Vercel Cron, the Docker sidecar, or <code>pnpm cron:tick</code> locally). A task runs on the first tick after its next scheduled time; “Run now” executes it immediately.</Alert>
+      <Alert tone="info">The scheduler is driven by <code>GET /api/cron/tick</code> every 5 minutes (Vercel Cron, the Docker sidecar, or <code>pnpm cron:tick</code> locally). A task runs on the first tick after its next scheduled time; “Run now” executes it immediately. On the Vercel Hobby plan the tick is once a day (00:00 UTC); Docker and Vercel Pro tick every 5 minutes.</Alert>
       <Card>
         <CardHeader title="Add a scheduled task" />
         <CardBody><TaskForm /></CardBody>

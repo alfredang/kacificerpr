@@ -8,7 +8,7 @@ description: Deploying Kacific ERP — Vercel (CLI or GitHub-driven CD), Neon pr
 
 **Env vars** (Vercel → Settings → Environment Variables, or `vercel env add NAME production`): `DATABASE_URL` (Neon pooled), `DB_DRIVER=neon`, `AUTH_SECRET`, `APP_ENCRYPTION_KEY`, `CRON_SECRET`, `APP_URL=https://<domain>`, `EMAIL_TRANSPORT=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, optional `DEEPSEEK_API_KEY`, `ASANA_PAT`, `ASANA_PROJECT_GID`, `TELEGRAM_*`. Never echo values; check presence with `vercel env ls`. GitHub secrets for CD: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `NEON_API_KEY`, `NEON_PROJECT_ID`, `DATABASE_URL`, `APP_ENCRYPTION_KEY` (`gh secret set NAME`).
 
-**Order for a first production deploy**: create Neon project (`neonctl projects create --name kacific-erp --org-id org-twilight-voice-91733704 --region-id aws-ap-southeast-1`) → `DATABASE_URL=<pooled> DB_DRIVER=neon pnpm db:migrate && pnpm db:seed` → set Vercel env → deploy → `/smoke <url>` → `vercel git connect` so CD takes over. Cron: `vercel.json` schedules `/api/cron/tick` every 5 min (Vercel sends `CRON_SECRET`).
+**Order for a first production deploy**: create Neon project (`neonctl projects create --name kacific-erp --org-id org-twilight-voice-91733704 --region-id aws-ap-southeast-1`) → `DATABASE_URL=<pooled> DB_DRIVER=neon pnpm db:migrate && pnpm db:seed` → set Vercel env → deploy → `/smoke <url>` → `vercel git connect` so CD takes over. Cron: `vercel.json` schedules `/api/cron/tick` daily (Hobby limit; use `*/5 * * * *` on Pro). Vercel sends `CRON_SECRET`.
 
 **Docker**: `docker compose --profile app up -d --build` (see docs/DOCKER.md); CI publishes `ghcr.io/alfredang/kacificerpr:latest`.
 

@@ -121,7 +121,7 @@ Vercel Cron ──▶ /api/cron/tick ──────────┴─▶ sch
 
 ## Deployment
 
-- **Vercel + Neon (CD):** push to `main` → [`deploy.yml`](.github/workflows/deploy.yml) applies migrations to the Neon production branch and deploys with `vercel deploy --prebuilt --prod`; pull requests get a seeded Neon branch and a preview URL. Secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `NEON_API_KEY`, `NEON_PROJECT_ID`, `DATABASE_URL`, `APP_ENCRYPTION_KEY`. Cron is declared in `vercel.json`.
+- **Vercel + Neon (CD):** push to `main` → [`deploy.yml`](.github/workflows/deploy.yml) applies migrations to the Neon production branch and deploys with `vercel deploy --prebuilt --prod`; pull requests get a seeded Neon branch and a preview URL. Secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `NEON_API_KEY`, `NEON_PROJECT_ID`, `DATABASE_URL`, `APP_ENCRYPTION_KEY`. Cron is declared in `vercel.json` — daily at 00:00 UTC on the Hobby plan (Vercel limits Hobby crons to once a day; on Pro set it to `*/5 * * * *`). Self-hosted Docker ticks every 5 minutes.
 - **CI:** [`ci.yml`](.github/workflows/ci.yml) runs lint, typecheck, unit tests, Playwright against a Postgres service, `pnpm audit`, and publishes `ghcr.io/alfredang/kacificerpr:latest`.
 - **Docker anywhere:** see the quick start above / [docs/DOCKER.md](docs/DOCKER.md).
 
