@@ -95,6 +95,19 @@ export const API_SCOPES = [
 ] as const;
 export type ApiScope = (typeof API_SCOPES)[number];
 
+/* DeepSeek V4 (OpenAI-compatible Chat Completions). The legacy deepseek-chat /
+   deepseek-reasoner names were discontinued on 2026-07-24. */
+export const DEEPSEEK_MODELS = [
+  { id: "deepseek-v4-flash", label: "DeepSeek V4 Flash — fast, economical (default)" },
+  { id: "deepseek-v4-pro", label: "DeepSeek V4 Pro — most capable" },
+] as const;
+export const DEEPSEEK_DEFAULT_MODEL = "deepseek-v4-flash";
+export const DEEPSEEK_THINKING = [
+  { id: "disabled", label: "Off — fastest tool calling (default)" },
+  { id: "low", label: "On, low effort" },
+  { id: "high", label: "On, high effort" },
+] as const;
+
 export const INTEGRATION_PROVIDERS = ["resend", "deepseek", "asana", "telegram"] as const;
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 

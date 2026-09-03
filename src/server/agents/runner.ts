@@ -47,7 +47,7 @@ export async function runAgent(kind: AgentKind, input: { prompt?: string; invoic
         promptTokens += res.usage.prompt_tokens;
         completionTokens += res.usage.completion_tokens;
         const msg = res.message;
-        messages.push({ role: "assistant", content: msg.content, tool_calls: msg.tool_calls });
+        messages.push({ role: "assistant", content: msg.content, tool_calls: msg.tool_calls, ...(msg.reasoning_content ? { reasoning_content: msg.reasoning_content } : {}) });
         if (!msg.tool_calls?.length) {
           summary = msg.content ?? "";
           trace.push({ step, assistant: summary });

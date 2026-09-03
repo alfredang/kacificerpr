@@ -97,7 +97,7 @@ export async function testIntegrationAction(provider: string): Promise<SettingsR
   const cfg = await resolveIntegration(p.data);
   let result = { ok: false, message: "No API key configured." };
   if (cfg.secret) {
-    if (p.data === "deepseek") result = await testDeepseek(cfg.secret, cfg.config.model || "deepseek-chat");
+    if (p.data === "deepseek") result = await testDeepseek(cfg.secret, cfg.config.model);
     else if (p.data === "asana") result = await testAsana(cfg.secret, cfg.config);
     else if (p.data === "telegram") result = await testTelegram(cfg.secret, cfg.config);
     else {

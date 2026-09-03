@@ -98,7 +98,7 @@ Configure under **Settings → Integrations** (stored AES-256-GCM encrypted; *Te
 
 | Integration | Purpose | Env |
 | --- | --- | --- |
-| **DeepSeek** | Agentic processes and the Hermes chat (`deepseek-chat`, tool calling) | `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` |
+| **DeepSeek** | Agentic processes and the Hermes chat (`deepseek-v4-flash` / `deepseek-v4-pro`, tool calling) | `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` |
 | **Asana** | Approval tasks (created on submit, completed on decision); kanban board; inbound webhook `/api/webhooks/asana` | `ASANA_PAT`, `ASANA_PROJECT_GID` |
 | **Resend** | Approval requests with one-click links, decisions, password resets, invitations, digests | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TRANSPORT=resend` |
 | **Telegram** | Hermes chatbot in Telegram (`/api/webhooks/telegram`), allow-listed chat ids | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_ALLOWED_CHAT_IDS`, `TELEGRAM_WEBHOOK_SECRET` |

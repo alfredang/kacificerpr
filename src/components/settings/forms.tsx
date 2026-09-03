@@ -22,7 +22,7 @@ import {
   updateUserAction,
   type SettingsResult,
 } from "@/server/actions/settings";
-import { API_SCOPES, ROLES, TASK_KINDS, TASK_KIND_LABEL, WEBHOOK_EVENTS } from "@/lib/constants";
+import { API_SCOPES, ROLES, TASK_KINDS, TASK_KIND_LABEL, WEBHOOK_EVENTS, DEEPSEEK_MODELS, DEEPSEEK_THINKING } from "@/lib/constants";
 import type { IntegrationView } from "@/server/services/settings";
 import type { User, ScheduledTask, WebhookEndpoint } from "@/db/schema";
 
@@ -84,9 +84,10 @@ export function UserRow({ u, self, locked }: { u: User; self: boolean; locked: b
   );
 }
 
-const INTEGRATION_META: Record<string, { title: string; desc: string; secretLabel: string; fields: { key: string; label: string; hint?: string }[] }> = {
+type FieldMeta = { key: string; label: string; hint?: string; options?: readonly { id: string; label: string }[] };
+const INTEGRATION_META: Record<string, { title: string; desc: string; secretLabel: string; fields: FieldMeta[] }> = {
   resend: { title: "Resend (email)", desc: "Sends approval requests, decisions, password resets, invitations and digests.", secretLabel: "Resend API key", fields: [{ key: "from", label: "From address", hint: 'e.g. Kacific ERP <erp@yourdomain.com> — the domain must be verified in Resend' }] },
-  deepseek: { title: "DeepSeek (AI agents)", desc: "Powers the agentic processes: PO drafting, reorder review, invoice match, vendor risk and the co-pilot chat.", secretLabel: "DeepSeek API key", fields: [{ key: "model", label: "Model", hint: "deepseek-chat (tool calling). deepseek-reasoner does not support tools." }] },
+  deepseek: { title: "DeepSeek (AI agents)", desc: "Powers the agentic processes: PO drafting, reorder review, invoice match, vendor risk and the co-pilot chat. OpenAI-compatible Chat Completions API (api.deepseek.com).", secretLabel: "DeepSeek API key", fields: [{ key: "model", label: "Model", hint: "V4 Flash for fast, cheap tool loops; V4 Pro for the hardest analyses. Both have a 1M-token context.", options: DEEPSEEK_MODELS }, { key: "thinking", label: "Thinking mode", hint: "Off is fastest for tool calling; on adds reasoning (reasoning_effort low/high).", options: DEEPSEEK_THINKING }] },
   telegram: { title: "Telegram (Hermes chatbot)", desc: "Lets staff talk to the Hermes agent from Telegram and powers the in-app chat widget's “Open in Telegram” link. Webhook: /api/webhooks/telegram.", secretLabel: "Bot token (from @BotFather)", fields: [{ key: "botUsername", label: "Bot username", hint: "without @, e.g. KacificHermesBot" }, { key: "allowedChatIds", label: "Allowed chat IDs", hint: "comma-separated; the bot tells unknown users their chat id" }, { key: "webhookSecret", label: "Webhook secret token", hint: "any random string; sent by Telegram as X-Telegram-Bot-Api-Secret-Token" }] },
   asana: { title: "Asana (approvals board)", desc: "Creates a task when a PO is submitted and completes it when the PO is decided.", secretLabel: "Personal access token", fields: [{ key: "projectGid", label: "Project GID", hint: "Tasks are added to this project" }, { key: "workspaceGid", label: "Workspace GID", hint: "Used only when no project is set" }] },
 };
@@ -112,7 +113,15 @@ export function IntegrationCard({ i }: { i: IntegrationView }) {
             <Input id={`${i.provider}-secret`} name="secret" type="password" autoComplete="off" placeholder={i.hasSecret ? "••••••••" : ""} />
           </Field>
           {meta.fields.map((f) => (
-            <Field key={f.key} label={f.label} htmlFor={`${i.provider}-${f.key}`} hint={f.hint}><Input id={`${i.provider}-${f.key}`} name={`cfg_${f.key}`} defaultValue={i.config[f.key] ?? ""} /></Field>
+            <Field key={f.key} label={f.label} htmlFor={`${i.provider}-${f.key}`} hint={f.hint}>
+              {f.options ? (
+                <Select id={`${i.provider}-${f.key}`} name={`cfg_${f.key}`} defaultValue={f.options.some((o) => o.id === i.config[f.key]) ? i.config[f.key] : f.options[0].id}>
+                  {f.options.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                </Select>
+              ) : (
+                <Input id={`${i.provider}-${f.key}`} name={`cfg_${f.key}`} defaultValue={i.config[f.key] ?? ""} />
+              )}
+            </Field>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">

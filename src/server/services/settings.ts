@@ -73,7 +73,10 @@ export async function resolveIntegration(provider: IntegrationProvider) {
     if (process.env.ASANA_PROJECT_GID) envConfig.projectGid = process.env.ASANA_PROJECT_GID;
     if (process.env.ASANA_WORKSPACE_GID) envConfig.workspaceGid = process.env.ASANA_WORKSPACE_GID;
   }
-  if (provider === "deepseek" && process.env.DEEPSEEK_MODEL) envConfig.model = process.env.DEEPSEEK_MODEL;
+  if (provider === "deepseek") {
+    if (process.env.DEEPSEEK_MODEL) envConfig.model = process.env.DEEPSEEK_MODEL;
+    if (process.env.DEEPSEEK_THINKING) envConfig.thinking = process.env.DEEPSEEK_THINKING;
+  }
   if (provider === "resend" && process.env.EMAIL_FROM) envConfig.from = process.env.EMAIL_FROM;
   if (provider === "telegram") {
     if (process.env.TELEGRAM_BOT_USERNAME) envConfig.botUsername = process.env.TELEGRAM_BOT_USERNAME;
