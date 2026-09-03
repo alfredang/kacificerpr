@@ -8,7 +8,7 @@
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs)](https://nextjs.org) [![React 19](https://img.shields.io/badge/React-19-20232a?logo=react&logoColor=61dafb)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org) [![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-06b6d4?logo=tailwindcss&logoColor=fff)](https://tailwindcss.com) [![Drizzle](https://img.shields.io/badge/Drizzle-ORM-c5f74f?logo=drizzle&logoColor=000)](https://orm.drizzle.team) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&logoColor=fff)](https://www.postgresql.org) [![Neon](https://img.shields.io/badge/Neon-serverless_Postgres-00e599?logo=neon&logoColor=000)](https://neon.tech) [![Vercel](https://img.shields.io/badge/Vercel-deploy-000?logo=vercel)](https://vercel.com) [![Docker](https://img.shields.io/badge/Docker-compose-2496ed?logo=docker&logoColor=fff)](https://docs.docker.com/compose/) [![Playwright](https://img.shields.io/badge/Playwright-e2e-2ead33?logo=playwright&logoColor=fff)](https://playwright.dev) [![CI](https://github.com/alfredang/kacificerpr/actions/workflows/ci.yml/badge.svg)](https://github.com/alfredang/kacificerpr/actions/workflows/ci.yml)
 
-**Live demo:** _deploying — link will appear here_ · **Login:** `admin1@kacific.com` / `admin12345`
+**Live demo:** https://kacific-erp-tertiaryinfotech.vercel.app · **Login:** `admin1@kacific.com` / `admin12345`
 
 </div>
 
