@@ -1,27 +1,62 @@
-# Node — only the test harness needs deps; the app itself has none
-node_modules/
-package-lock.json
-npm-debug.log*
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Environment / secrets
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.pfx
-*.keystore
-id_rsa*
-.netrc
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Editor / OS local state
-.vscode/
-.idea/
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-Thumbs.db
+*.pem
 
-# Local agent tooling, not part of the project
-.claude/
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# keep the templates, drop the real env files
+!.env.example
+!.env.docker.example
+
+# local agent tooling and test output (.claude/ and .mcp.json ARE committed)
+.claude/settings.local.json
+.playwright-mcp/
+/test-results/
+/playwright-report/
+/tests/e2e/.auth/
 skills-lock.json
-.mcp.json
+
+# .env.local is committed ON PURPOSE (local-dev-only values) so the prototype
+# reproduces from a clone. Real API keys go in Vercel env / Settings -> Integrations.
+!.env.local
+
+# Distribution archives (rebuildable — never pushed to GitHub)
+*.zip
+# Source material the project was derived from — not ours to republish.
+**/reference/

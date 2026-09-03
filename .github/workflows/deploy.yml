@@ -1,0 +1,100 @@
+# Continuous deployment: main → Neon migrations → Vercel production.
+# Pull requests → Neon branch (schema + seed) → Vercel preview, torn down on close.
+#
+# Required repository secrets:
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   NEON_API_KEY, NEON_PROJECT_ID
+#   DATABASE_URL            (Neon production branch, pooled connection string)
+#   APP_ENCRYPTION_KEY, AUTH_SECRET, CRON_SECRET  (only needed if you let this
+#                            workflow seed a fresh production database)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  production:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Apply Drizzle migrations to Neon (production branch)
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_DRIVER: neon
+      - run: pnpm dlx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: pnpm dlx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - id: deploy
+        run: echo "url=$(pnpm dlx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+      - name: Smoke test
+        run: |
+          curl -fsS "${{ steps.deploy.outputs.url }}/api/health"
+          curl -fsSI "${{ steps.deploy.outputs.url }}/login" | grep -i "strict-transport-security"
+
+  preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Create / reuse Neon branch for this PR
+        id: neon
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+      - name: Migrate + seed the preview branch
+        run: pnpm db:migrate && pnpm db:seed
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url_with_pooler }}
+          DB_DRIVER: neon
+          APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
+      - run: pnpm dlx vercel@latest pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - run: pnpm dlx vercel@latest build --token=${{ secrets.VERCEL_TOKEN }}
+      - id: deploy
+        run: echo "url=$(pnpm dlx vercel@latest deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --env DATABASE_URL='${{ steps.neon.outputs.db_url_with_pooler }}' --env DB_DRIVER=neon)" >> "$GITHUB_OUTPUT"
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            🚀 Preview deployed: ${{ steps.deploy.outputs.url }}
+            🗄️ Neon branch: `preview/pr-${{ github.event.number }}` (seeded with the demo data; admin1@kacific.com / admin12345)
+
+  cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}

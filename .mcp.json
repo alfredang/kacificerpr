@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"]
+    },
+    "kacific-erp": {
+      "type": "http",
+      "url": "http://localhost:3000/api/v1/mcp",
+      "headers": { "Authorization": "Bearer ${KACIFIC_API_KEY}" }
+    }
+  }
+}

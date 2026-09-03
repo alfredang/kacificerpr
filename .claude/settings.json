@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm dlx *)",
+      "Bash(node *)",
+      "Bash(npx tsx *)",
+      "Bash(docker compose *)",
+      "Bash(docker *)",
+      "Bash(vercel *)",
+      "Bash(neonctl *)",
+      "Bash(gh *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push*)",
+      "Bash(curl *)",
+      "Bash(openssl rand *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "mcp__playwright__*"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.docker)",
+      "Read(./.env.production)",
+      "Bash(git push --force*)",
+      "Bash(rm -rf /*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/typecheck-on-edit.sh", "timeout": 120 }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/guard-secrets.sh", "timeout": 60 }]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [{ "type": "command", "command": "bash .claude/hooks/on-stop.sh", "timeout": 30 }]
+      }
+    ]
+  }
+}

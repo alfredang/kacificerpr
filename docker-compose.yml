@@ -1,0 +1,73 @@
+# Profiles:
+#   db   → just Postgres 16 on localhost:5433 (local development)     docker compose --profile db up -d
+#   app  → Postgres + migrate/seed + the ERP + a cron ticker (self-hosted deploy)
+#          docker compose --profile app up -d --build
+# Secrets for the `app` profile come from .env.docker (copy .env.docker.example).
+services:
+  db:
+    image: postgres:16-alpine
+    profiles: ["db", "app"]
+    environment:
+      POSTGRES_USER: kacific
+      POSTGRES_PASSWORD: kacific
+      POSTGRES_DB: kacific_erp
+    ports:
+      - "5433:5432"
+    volumes:
+      - kacific_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kacific -d kacific_erp"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    profiles: ["app"]
+    build:
+      context: .
+      target: tools
+    env_file: [.env.docker]
+    environment:
+      DATABASE_URL: postgresql://kacific:kacific@db:5432/kacific_erp
+      DB_DRIVER: pg
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    profiles: ["app"]
+    build:
+      context: .
+      target: runner
+    image: kacific-erp:local
+    env_file: [.env.docker]
+    environment:
+      DATABASE_URL: postgresql://kacific:kacific@db:5432/kacific_erp
+      DB_DRIVER: pg
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # Same code path as Vercel Cron: hit /api/cron/tick every 5 minutes.
+  cron:
+    profiles: ["app"]
+    image: curlimages/curl:8.10.1
+    env_file: [.env.docker]
+    depends_on:
+      app:
+        condition: service_healthy
+    command: >
+      sh -c 'while true; do
+        curl -fsS -H "Authorization: Bearer $$CRON_SECRET" http://app:3000/api/cron/tick || true;
+        sleep 300;
+      done'
+    restart: unless-stopped
+
+volumes:
+  kacific_pgdata:

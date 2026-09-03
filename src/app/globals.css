@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* Kacific brand tokens — measured from kacific.com, ported from the original
+   LogiTrack page. Blues, greys, type weights and radii are brand values; the
+   ok/warn/bad pairs are functional traffic-light colours, not brand. */
+@theme {
+  --color-blue: #034ea2;        /* primary; exact logo blue; 8.03:1 on white */
+  --color-blue-deep: #003c72;   /* pressed / active */
+  --color-blue-footer: #07529e; /* dark bands; white text = 7.75:1 */
+  --color-sky: #358ccb;         /* secondary accents (not for small text) */
+  --color-wave: #52a4ca;        /* decorative only */
+  --color-cyan: #5dc1d4;        /* decorative arc line-work only */
+  --color-orbit-grey: #a7a9ac;  /* logo swoosh; dividers */
+
+  --color-ink: #111111;
+  --color-ink-soft: #616161;
+  --color-ink-faint: #767676;
+  --color-line: #e3e8ef;
+  --color-line-strong: #cfd7e2;
+  --color-card: #ffffff;
+  --color-bg: #ffffff;
+  --color-tint: #f1f4fa;        /* pale blue wash */
+  --color-wash: #f4f4f4;        /* grey wash */
+  --color-accent-tint: #e8f0f8; /* row hover */
+
+  --color-ok-bg: #e3f5e9;   --color-ok-fg: #1a6b39;
+  --color-warn-bg: #fdf1da; --color-warn-fg: #8a5a06;
+  --color-bad-bg: #fde6e6;  --color-bad-fg: #a12525;
+
+  --font-sans: var(--font-montserrat), "Segoe UI", system-ui, -apple-system,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius-pill: 38px;   /* buttons and pills only */
+  --radius-card: 5px;    /* cards and inputs */
+  --radius-sm: 4px;
+
+  --shadow-card: 0 1px 3px rgba(3, 78, 162, 0.08), 0 1px 2px rgba(3, 78, 162, 0.05);
+  --shadow-lift: 0 10px 30px rgba(3, 78, 162, 0.13), 0 2px 6px rgba(3, 78, 162, 0.07);
+
+  --ease-brand: 0.3s ease;
+}
+
+@layer base {
+  html { color-scheme: light; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-weight: 300;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-weight: 600; line-height: 1.1; letter-spacing: 0; }
+  strong, b { font-weight: 600; }
+  ::selection { background: var(--color-accent-tint); }
+  :focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+  input, select, textarea { font-weight: 400; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* The orbit-arc motif from the logo, used behind blue bands. */
+  .orbit-band {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-blue-footer);
+    color: #fff;
+  }
+  .orbit-band::before,
+  .orbit-band::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(93, 193, 212, 0.35);
+    pointer-events: none;
+  }
+  .orbit-band::before { width: 720px; height: 720px; right: -260px; top: -420px; }
+  .orbit-band::after  { width: 1100px; height: 1100px; right: -420px; top: -700px; border-color: rgba(93, 193, 212, 0.18); }
+
+  .tabular { font-variant-numeric: tabular-nums; }
+}

@@ -1,150 +1,145 @@
-# LogiTrack Inventory
+<div align="center">
 
-A single-file warehouse inventory dashboard in Kacific livery: four big KPI cards, a
-filterable and sortable stock table with derived stock-status, an inline add/delete
-form, an FAQ and a footer. No build step, no runtime dependencies, no framework, and
-no network requests — the entire app is one `index.html` (design tokens + CSS,
-markup, one IIFE of ES5-flavoured vanilla JS, and the logo inlined as a data URI).
+<img src="public/kacific-logo.png" alt="Kacific" width="220" />
 
-**Live demo:** https://alfredang.github.io/kacificlogistics/
+# Kacific ERP
 
-![The LogiTrack Inventory dashboard: four large KPI cards — Total SKUs, Units in Stock, Below Reorder Level, Stock Value — lifted over a blue Kacific band, above a sortable stock table with derived In Stock / Low Stock badges and the add-record form in a side panel](docs/screenshot.png)
+**Procurement, inventory and vendor operations for a Ka-band satellite broadband network — purchase orders with human-in-the-loop approval, 3-way-matched invoices, per-depot stock, low-stock replenishment, DeepSeek agents, an Asana board, a Telegram/Hermes chatbot and an external REST + MCP API.**
 
-## The data is placeholder seed data
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs)](https://nextjs.org) [![React 19](https://img.shields.io/badge/React-19-20232a?logo=react&logoColor=61dafb)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org) [![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-06b6d4?logo=tailwindcss&logoColor=fff)](https://tailwindcss.com) [![Drizzle](https://img.shields.io/badge/Drizzle-ORM-c5f74f?logo=drizzle&logoColor=000)](https://orm.drizzle.team) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&logoColor=fff)](https://www.postgresql.org) [![Neon](https://img.shields.io/badge/Neon-serverless_Postgres-00e599?logo=neon&logoColor=000)](https://neon.tech) [![Vercel](https://img.shields.io/badge/Vercel-deploy-000?logo=vercel)](https://vercel.com) [![Docker](https://img.shields.io/badge/Docker-compose-2496ed?logo=docker&logoColor=fff)](https://docs.docker.com/compose/) [![Playwright](https://img.shields.io/badge/Playwright-e2e-2ead33?logo=playwright&logoColor=fff)](https://playwright.dev) [![CI](https://github.com/alfredang/kacificerpr/actions/workflows/ci.yml/badge.svg)](https://github.com/alfredang/kacificerpr/actions/workflows/ci.yml)
 
-`inventory.csv` holds 30 **fictional** records — invented SKUs, suppliers and
-Southeast Asian warehouse names (Singapore Hub, Johor DC, Jakarta Depot, Bangkok
-Cross-dock). None of it is real inventory, real pricing, or a real supplier list.
-Replace it with your own CSV before treating any number on screen as meaningful.
+**Live demo:** _deploying — link will appear here_ · **Login:** `admin1@kacific.com` / `admin12345`
 
-## Running it locally
+</div>
 
-Two supported modes, and both must keep working:
+![Kacific ERP dashboard — KPI cards over the Kacific blue band, PO spend, stock value by depot and invoice status charts, low-stock table and activity feed](screenshot.png)
 
-**`file://` — just double-click `index.html`.** Browsers block `fetch()` on
-`file://` URLs, so the app falls back to a copy of the CSV embedded in the page and
-shows a degraded-source warning under the table heading. This is a supported path,
-not a bug.
+> **Prototype notice.** Kacific ERP is a prototyping build for the Kacific ERP project. Depots, vendors, SKUs, purchase orders, invoices and people are **fictional but plausible** for a Ka-band satellite operator (Gigstarter terminal kits, iDirect MDM2010 modems, CommsBox rapid-deploy kits, solar power kits, gateway spares). Nothing here is real inventory, pricing or a real supplier list.
 
-**`http://` — serve the folder:**
+## What's inside
 
-```
-python -m http.server 8000
-```
+| Area | What it does |
+| --- | --- |
+| **Dashboard** | KPI cards (open POs, awaiting approval, MTD spend, invoices due), bar charts (PO spend by month, stock value by depot, invoices by status), network-wide low-stock table, activity feed |
+| **Purchase orders** | Draft → **Pending approval (human gate)** → Approved → Ordered → Received → Closed with a visual stepper and a per-PO event timeline; managers approve in-app, via **one-click signed email links**, through Asana, Telegram, or the API |
+| **Invoices** | Vendor invoices linked to POs with a **3-way match** (PO ↔ goods receipt ↔ price tolerance), approve, pay, dispute |
+| **Vendors · SKUs · stock** | Lead times, terms, spend and risk per vendor; SKUs with preferred vendor, reorder level/qty and stock per depot; every stock change is a movement row |
+| **Low stock** | Network-wide shortfall grouped by preferred vendor with **one-click Generate PO** |
+| **Process timeline** | Horizontal procure-to-pay flow with live counts per stage, human gates and agent-assisted stages highlighted, plus a company-wide event timeline |
+| **Asana** | Kanban board of PO approval tasks (demo cards until a PAT is configured); tasks are created on submit and completed on decision |
+| **AI agents (DeepSeek)** | Draft a PO from plain language, reorder recommendations, invoice-match assistant, vendor risk summary, and a co-pilot chat — every run is logged and **nothing is written until a person clicks Apply** |
+| **Hermes widget + Telegram** | Bottom-right chat that answers from live data; the same agent runs as a Telegram bot (token in Settings) |
+| **Company settings** | Company profile & approval threshold, **users & roles**, integrations (DeepSeek, Asana, Resend, Telegram — encrypted at rest with *Test connection*), **API keys**, **scheduled tasks** (cron), **webhooks** (signed, retried) |
+| **External API** | `/api/v1` REST with OpenAPI 3.1 + an MCP endpoint (`/api/v1/mcp`) so agents such as Hermes can query stock/POs and raise or approve purchase orders — see [docs/HERMES.md](docs/HERMES.md) |
 
-then open <http://localhost:8000/>. Here `inventory.csv` is fetched with
-`cache: 'no-store'`, so edits to the file show up on reload.
+Roles: `admin` (everything, incl. settings), `manager` (approve), `procurement` (order/receive, masters), `finance` (invoices, pay, close), `sales` / `requester` (raise POs), `operations` (receive, stock), `viewer`.
 
-## Branding
+## Quick start — Docker Compose (reproduces the full prototype)
 
-The page follows Kacific's visual identity: the exact logo blue `#034EA2`, the
-`#07529E` band used for the hero and footer, Montserrat with a system fallback, pill
-buttons that invert on hover, and the orbit-arc motif from the logo repeated as
-off-canvas circles behind the hero, the KPI cards and the footer.
+The fastest way to get the exact prototype — schema, demo data and every login — on any machine with Docker:
 
-Two constraints shape how that is implemented, and both are deliberate:
+```bash
+git clone https://github.com/alfredang/kacificerpr.git
+cd kacificerpr
 
-- **No Google Fonts `<link>`.** A remote stylesheet fails under `file://`, so the
-  font stack is `Montserrat, "Segoe UI", system-ui, …` — Montserrat when it is
-  installed, a clean fallback otherwise.
-- **The logo and favicon are inlined as `data:` URIs.** The page stays genuinely
-  self-contained; `tools/test.js` asserts that nothing is loaded from the network.
+# 1. secrets for the containers
+cp .env.docker.example .env.docker
+#    edit .env.docker → AUTH_SECRET and APP_ENCRYPTION_KEY = `openssl rand -base64 32`,
+#    CRON_SECRET = any random string, APP_URL = http://localhost:3000
 
-Status colours are **not** brand blues. `In Stock` / `Low Stock` / `Out of Stock`
-have to read as traffic lights at a glance, so they stay green/amber/red.
-
-## The data duplication that will bite you
-
-`inventory.csv` exists **twice**: as the file, and byte-identical inside
-`<script type="text/csv" id="embedded-csv">` in `index.html`. Edit one without the
-other and `file://` and `http://` will show different data.
-
-After editing `inventory.csv`, run:
-
-```
-node tools/sync-embedded-csv.js
+# 2. build and start everything
+docker compose --profile app up -d --build
 ```
 
-It rewrites the embedded block from the file, refuses to embed a CSV containing a
-`</script` tag, and is idempotent (prints "Already in sync" when there is nothing to
-do). This is optional maintenance tooling, **not** a build step — `index.html` runs
-exactly as shipped.
+What that does, in order:
 
-## Tests
+1. **`db`** — Postgres 16 with a persistent volume (`kacific_pgdata`), waits until healthy.
+2. **`migrate`** — one-shot container that applies the Drizzle migrations (**schema**) and runs the **seed** (8 depots, 10 vendors, 34 SKUs with per-depot stock, 16 purchase orders across the whole lifecycle, 12 invoices incl. two disputed, scheduled tasks, an example webhook, and all the accounts below). Idempotent — re-run any time.
+3. **`app`** — the Next.js standalone image on http://localhost:3000 (health-checked at `/api/health`).
+4. **`cron`** — a sidecar that calls `/api/cron/tick` every 5 minutes, exactly like Vercel Cron.
+
+Then open **http://localhost:3000** and sign in:
+
+| Account | Password | Role |
+| --- | --- | --- |
+| `admin1@kacific.com` … `admin6@kacific.com` | `admin12345` | admin — full access incl. company settings |
+| `sales@kacific.com` | `admin12345` | sales — raise/submit POs |
+| `procurement@kacific.com` | `admin12345` | procurement — order, receive, masters |
+| `operations@kacific.com` | `admin12345` | operations — receive goods, adjust stock |
+| `manager@kacific.example` | `Kacific2026!` | manager — approves POs |
+| `finance@kacific.example` | `Kacific2026!` | finance — invoices, pay, close |
+| `requester@kacific.example` · `viewer@kacific.example` | `Kacific2026!` | requester · read-only |
+
+Useful: `docker compose --profile app logs -f app` · `docker compose --profile app down` (keeps data) · `down -v` (wipe) · `run --rm migrate` (re-seed). Emails the app sends (approval links, resets) are visible at http://localhost:3000/dev/mailbox while `EMAIL_TRANSPORT=outbox`. Full guide: [docs/DOCKER.md](docs/DOCKER.md).
+
+## Local development (Node + Docker Postgres)
+
+```bash
+pnpm install
+cp .env.example .env.local            # add AUTH_SECRET / APP_ENCRYPTION_KEY via `openssl rand -base64 32`
+pnpm db:local:up                      # postgres:16 on localhost:5433
+pnpm db:migrate && pnpm db:seed       # schema + demo data (prints the logins)
+pnpm dev                              # http://localhost:3000
+```
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm lint` · `pnpm typecheck` · `pnpm test` | ESLint, tsc, Vitest (state machine, RBAC, crypto, 3-way match…) |
+| `pnpm test:e2e` | Playwright: auth, procure-to-pay incl. email approval link, agents, API keys, cron, headers |
+| `pnpm db:generate` → `pnpm db:migrate` | Drizzle migration workflow (`pnpm db:studio` to browse) |
+| `pnpm cron:tick` | Fire the scheduler once |
+| `pnpm api-key "Hermes" procurement read:stock,read:po,write:po` | Mint an external API key |
+
+To link localhost to the **Vercel + Neon** environment instead (`vercel link && vercel env pull .env.local`), or to give yourself a private Neon branch, see [docs/LOCAL-SETUP.md](docs/LOCAL-SETUP.md).
+
+## Integrations
+
+Configure under **Settings → Integrations** (stored AES-256-GCM encrypted; *Test connection* verifies) or via environment variables:
+
+| Integration | Purpose | Env |
+| --- | --- | --- |
+| **DeepSeek** | Agentic processes and the Hermes chat (`deepseek-chat`, tool calling) | `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` |
+| **Asana** | Approval tasks (created on submit, completed on decision); kanban board; inbound webhook `/api/webhooks/asana` | `ASANA_PAT`, `ASANA_PROJECT_GID` |
+| **Resend** | Approval requests with one-click links, decisions, password resets, invitations, digests | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TRANSPORT=resend` |
+| **Telegram** | Hermes chatbot in Telegram (`/api/webhooks/telegram`), allow-listed chat ids | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_ALLOWED_CHAT_IDS`, `TELEGRAM_WEBHOOK_SECRET` |
+
+Without keys the app runs in demo mode (outbox emails, sample Asana cards, agents disabled or `AI_MOCK=1`).
+
+## Architecture
 
 ```
-npm install jsdom     # the app has no deps; only the harness needs this
-node tools/test.js    # 83 checks, exits non-zero on failure
+Browser ──▶ src/proxy.ts (JWT gate) ──▶ (app) shell · server components ──▶ src/server/services/* ──▶ Drizzle ──▶ Postgres (local / Neon)
+                                         │ server actions (Zod + RBAC)            │ audit_log · po_events
+Email links ─▶ /approvals/[token] ───────┤                                        ├─▶ events.emit ─▶ signed webhooks (+ retries)
+Hermes / MCP ─▶ /api/v1 (Bearer keys) ───┤   src/server/agents/tools.ts  ◀────────┤   (one registry: DeepSeek · REST · MCP)
+Vercel Cron ──▶ /api/cron/tick ──────────┴─▶ scheduled_tasks → jobs (low-stock scan, reorder agent, overdue invoices, Asana sync, digest, webhook retry)
 ```
 
-`tools/test.js` drives the real DOM and covers all four load paths (fetch succeeds /
-fetch blocked → embedded fallback / malformed CSV / nothing available), plus
-rendering, derived status, filtering, sorting, delete, validation and the
-accessibility attributes. There is no runner and no watch mode — it is one plain
-Node file.
-
-Two things to respect when extending it:
-
-- **Expectations are derived from `inventory.csv`, never hardcoded.** Row counts,
-  totals and the SKUs used for each case are computed from the file, so editing the
-  data does not break the suite. Keep it that way.
-- **Stub `fetch` via JSDOM's `beforeParse`.** The page's script runs at parse time,
-  so assigning `window.fetch` after construction is too late; and because the CSV
-  load is async, assertions must await a tick first.
+- **Secure by design** — argon2id, httpOnly JWT sessions with server-side revocation, single-use hashed tokens, DB-backed rate limits + lockout, central RBAC, Zod everywhere, encrypted secrets, scoped hashed API keys, HMAC-signed webhooks, CSP/HSTS headers, full audit log. Details: [docs/SECURITY.md](docs/SECURITY.md).
+- **Human in the loop** — approvals, invoice matches and every agent proposal require a person; the visual stepper and timelines make that gate explicit.
+- **One code path for cloud and self-hosted** — the driver switch in `src/db/index.ts` selects `pg` or Neon's serverless driver; the same image runs on Vercel or Docker.
 
 ## Deployment
 
-Pushing to `main` triggers `.github/workflows/pages.yml`, which uploads the repo root
-as-is and deploys it to GitHub Pages. There is no build step to configure — the
-static files are the artifact.
+- **Vercel + Neon (CD):** push to `main` → [`deploy.yml`](.github/workflows/deploy.yml) applies migrations to the Neon production branch and deploys with `vercel deploy --prebuilt --prod`; pull requests get a seeded Neon branch and a preview URL. Secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `NEON_API_KEY`, `NEON_PROJECT_ID`, `DATABASE_URL`, `APP_ENCRYPTION_KEY`. Cron is declared in `vercel.json`.
+- **CI:** [`ci.yml`](.github/workflows/ci.yml) runs lint, typecheck, unit tests, Playwright against a Postgres service, `pnpm audit`, and publishes `ghcr.io/alfredang/kacificerpr:latest`.
+- **Docker anywhere:** see the quick start above / [docs/DOCKER.md](docs/DOCKER.md).
 
-**If you fork this, the first run will fail.** The workflow sets
-`actions/configure-pages` to `enablement: true`, but creating a Pages site needs
-admin rights that the workflow's `GITHUB_TOKEN` does not have, so it dies with
-`Create Pages site failed. Error: Resource not accessible by integration`. Enable
-Pages once by hand — Settings → Pages → Source: **GitHub Actions**, or
-`gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow` — and re-run the
-workflow. Every deploy after that works unattended.
+## Working with Claude Code
 
-## Conventions a contributor could break by accident
+The repo ships a committed `.claude/` toolkit: slash commands (`/dev`, `/test`, `/db-push`, `/db-seed`, `/db-branch`, `/deploy`, `/docker-deploy`, `/cron-tick`, `/api-key`, `/hermes-test`, `/new-module`, `/security-audit`, `/e2e`, `/smoke`), agents (`erp-qa` drives the app through the Playwright MCP, `security-reviewer`, `db-reviewer`), skills (branding, ERP domain rules, DB workflow, deploy, new-module recipe) and hooks (typecheck after every edit, secret guard on commit). `CLAUDE.md` files at the root and per directory hold the invariants; `.mcp.json` registers Playwright and the ERP's own MCP endpoint.
 
-The script in `index.html` is split into numbered sections (`1. CONSTANTS` …
-`8. INITIALISATION`). The invariants worth knowing before editing:
+## Repository layout
 
-- **`inventory` is the single source of truth.** Populated once from the CSV at
-  startup; nothing re-reads the CSV afterwards. Adds and deletes mutate this array
-  and then call `renderAll()`. There is no persistence — a reload discards changes.
-- **`COLUMNS` drives both `<thead>` and the sort comparator**, so they cannot drift.
-  Adding a column means adding a `COLUMNS` entry *and* the matching `tr.appendChild`
-  in `renderTable()`. `type` selects the comparator: `'number'`, `'status'` (ranked
-  by urgency via `STATUS_RANK`, not alphabetically), `'text'` (`localeCompare`), or
-  `null` for non-sortable. SKU is the stable tiebreaker for every sort.
-- **Status is derived, never stored.** `getStatus()` reads `qty` vs `reorder`; do not
-  add a `status` field to records.
-- **`CATEGORIES` / `WAREHOUSES` constants feed every `<select>`** — the filter
-  dropdown and both form dropdowns — through `populateSelects()`.
-- **Filters and sort are view-only state** and never touch `inventory`;
-  `getVisibleRecords()` returns a fresh filtered+sorted array. The KPI cards reflect
-  the whole dataset, not the filtered view — a search must never make the network
-  look healthier than it is. The count above the table is the one that follows the
-  filters.
-- **Event handling is delegated** on `#header-row` and `#table-body`, because rows
-  and their buttons are rebuilt on every render.
-- **Vanilla ES5-flavoured JS inside one IIFE with `'use strict'`** — `var`, function
-  expressions, no arrow functions, no classes, no imports, no external libraries.
-- **Cells are built with `document.createElement` + `textContent`**, never
-  `innerHTML` with data. That is what keeps user input inert.
-- **No `alert()` / `confirm()`.** Feedback goes to the `#announcer` live region via
-  `announce()`; form errors render inline per field via `showError()`.
-- **Accessibility is load-bearing:** `aria-sort` on the active header, `aria-invalid`
-  + `aria-describedby` on failed fields, focus moved to the first invalid field on
-  submit, `aria-label` carrying the SKU on delete buttons, `role="status"`
-  announcements. Keep these when touching render or validation code.
-- **Colours, spacing and radii come from the `:root` design tokens** — add a token
-  rather than hard-coding a value.
+```
+src/app            routes: (auth), (app)/…, approvals/[token], api/{v1,cron,webhooks,agents,health}, dev/mailbox
+src/components     ui primitives · shell · charts · po · invoices · skus · vendors · agents · settings · hermes · timeline
+src/server         auth · services · agents · integrations · jobs · webhooks · security · actions · api
+src/db             schema.ts · index.ts (driver switch)      drizzle/   migrations
+scripts            migrate · seed · reset · cron-tick · api-key      tests/     unit (Vitest) · e2e (Playwright)
+docs               LOCAL-SETUP · DOCKER · HERMES · SECURITY         .claude/   commands · agents · skills · hooks
+```
 
-Three distinct empty states are rendered in `renderTable()` and saying the wrong one
-misleads the user: still loading / CSV loaded nothing / filter matched nothing.
-Likewise `loadInventory()` guards `fetch` with a `try`/`catch` because a bare call
-throws a synchronous `ReferenceError` where `fetch` is absent, which would escape the
-`.catch()`.
+## Acknowledgements
+
+Built for the Kacific ERP prototyping project on Next.js, Drizzle, Neon, Vercel, DeepSeek, Asana, Resend and Playwright. Brand colours and typography are measured from [kacific.com](https://kacific.com). Powered by [Tertiary Infotech Academy Pte Ltd](https://www.tertiaryinfotech.com/).
