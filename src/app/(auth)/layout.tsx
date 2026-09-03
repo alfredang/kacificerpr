@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function AuthLayout({ children }: LayoutProps<"/">) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
       <section className="orbit-band hidden flex-col justify-between p-10 lg:flex">

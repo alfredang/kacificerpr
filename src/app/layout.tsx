@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "Procurement, inventory and vendor operations for the Kacific satellite broadband network.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${montserrat.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">{children}</body>

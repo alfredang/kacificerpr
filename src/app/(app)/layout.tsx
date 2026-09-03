@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
 import { HermesWidget } from "@/components/hermes/widget";
 
-export default async function AppLayout({ children }: LayoutProps<"/">) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const [{ n }] = await getDb().select({ n: count() }).from(purchaseOrders).where(eq(purchaseOrders.status, "pending_approval"));
   const canApprove = can(user.role, "po.approve");
