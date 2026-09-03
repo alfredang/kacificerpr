@@ -4,14 +4,13 @@ import { purchaseOrders, users } from "@/db/schema";
 import type { TaskKind } from "@/lib/constants";
 import { money, num } from "@/lib/format";
 import { digestEmail, sendEmail } from "@/server/integrations/email";
-import { getAsanaTask } from "@/server/integrations/asana";
 import { emit } from "@/server/events";
 import { retryDue } from "@/server/webhooks/deliver";
 import { appUrl } from "@/server/services/auth";
 import { overdueInvoices } from "@/server/services/invoice";
 import { lowStockList } from "@/server/services/sku";
-import { decidePo } from "@/server/services/po";
 import { runAgent } from "@/server/agents/runner";
+import { syncAsana } from "@/server/services/asana-sync";
 
 /* One function per scheduled task kind. Each returns a short log line that is
    stored on the run. Jobs are idempotent and safe to re-run. */
@@ -59,19 +58,8 @@ const JOBS: Record<TaskKind, (config: Record<string, unknown>) => Promise<string
   },
 
   async asana_sync() {
-    const db = getDb();
-    const pending = await db.query.purchaseOrders.findMany({ where: eq(purchaseOrders.status, "pending_approval") });
-    let applied = 0;
-    for (const po of pending) {
-      if (!po.asanaTaskGid) continue;
-      const task = await getAsanaTask(po.asanaTaskGid);
-      if (task?.completed) {
-        // A task completed in Asana counts as approval by the Asana integration.
-        await decidePo(po.id, "approve", { actor: { type: "system", label: "Asana sync" }, role: "admin", note: "Task completed in Asana", approverId: null, via: "asana" });
-        applied += 1;
-      }
-    }
-    return `${pending.length} pending PO(s) checked; ${applied} approved from Asana.`;
+    const r = await syncAsana({ type: "system", label: "Scheduler" });
+    return r.message;
   },
 
   async daily_digest() {

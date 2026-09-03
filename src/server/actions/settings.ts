@@ -10,6 +10,8 @@ import { createApiKey, revokeApiKey } from "@/server/services/api-keys";
 import { deleteTask, executeTask, saveTask } from "@/server/services/tasks";
 import { createEndpoint, deleteEndpoint, sendTestEvent, updateEndpoint } from "@/server/services/webhooks";
 import { redeliver } from "@/server/webhooks/deliver";
+import { purgeDemoData } from "@/server/services/purge";
+import { syncAsana } from "@/server/services/asana-sync";
 import { testAsana } from "@/server/integrations/asana";
 import { testDeepseek } from "@/server/integrations/deepseek";
 import { testTelegram } from "@/server/integrations/telegram";
@@ -199,4 +201,20 @@ export async function redeliverAction(deliveryId: string) {
   await requireAction("settings.manage");
   await redeliver([deliveryId]);
   revalidatePath("/settings/webhooks");
+}
+
+export async function purgeDemoDataAction(_p: SettingsResult, formData: FormData): Promise<SettingsResult> {
+  const user = await requireAction("settings.manage");
+  if (String(formData.get("confirm") ?? "") !== "DELETE") return { error: "Type DELETE to confirm." };
+  const c = await purgeDemoData(userActor(user));
+  revalidatePath("/", "layout");
+  return { ok: true, message: `Demo data removed: ${c.purchaseOrders} purchase orders, ${c.invoices} invoices, ${c.skus} SKUs, ${c.vendors} vendors. Logins, settings and integrations are untouched.` };
+}
+
+export async function syncAsanaAction(): Promise<SettingsResult> {
+  const user = await requireAction("asana.sync");
+  const r = await syncAsana(userActor(user));
+  revalidatePath("/asana");
+  revalidatePath("/purchase-orders");
+  return r.ok ? { ok: true, message: r.message } : { error: r.message };
 }

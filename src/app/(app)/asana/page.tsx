@@ -6,6 +6,11 @@ import { can } from "@/server/auth/rbac";
 import { asanaBoard } from "@/server/services/asana-board";
 import { Button } from "@/components/ui/button";
 import { Badge, PoStatusBadge } from "@/components/ui/badge";
+import { SyncAsanaButton } from "@/components/settings/forms";
+import { Table, Td, Th, Tr } from "@/components/ui/table";
+import { syncedTasks } from "@/server/services/asana-sync";
+import { dateTime } from "@/lib/format";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Alert, PageHeader } from "@/components/ui/misc";
 import { dateShort, money } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -18,7 +23,8 @@ const HEAD: Record<string, string> = { warn: "border-t-warn-fg", blue: "border-t
 
 export default async function AsanaPage() {
   const user = await requireAction("asana.view");
-  const { columns, mode, integration } = await asanaBoard();
+  const { columns, mode, integration, sync } = await asanaBoard();
+  const mirror = sync.n ? await syncedTasks() : [];
   const total = columns.reduce((s, c) => s + c.cards.length, 0);
   return (
     <>
@@ -29,6 +35,7 @@ export default async function AsanaPage() {
         actions={
           <>
             <Badge tone={mode === "live" ? "ok" : "warn"}>{mode === "live" ? "Live · connected" : "Demo mode · sample tasks"}</Badge>
+            {mode === "live" && can(user.role, "asana.sync") ? <SyncAsanaButton /> : null}
             {can(user.role, "settings.manage") ? <Button href="/settings/integrations" variant="secondary" size="sm">Configure</Button> : null}
           </>
         }
@@ -69,7 +76,28 @@ export default async function AsanaPage() {
           ))}
         </div>
       </div>
-      <p className="mt-2 text-[12px] text-ink-faint">{total} task{total === 1 ? "" : "s"} · {mode === "live" ? "fetched from Asana" : "derived from seeded purchase orders"}</p>
+      <p className="mt-2 text-[12px] text-ink-faint">{total} task{total === 1 ? "" : "s"} · {mode === "live" ? (sync.at ? `synced to the database ${dateTime(sync.at)} (${sync.n} tasks)` : "fetched from Asana — press Sync now to mirror tasks into the database") : "derived from seeded purchase orders"}</p>
+      {mirror.length ? (
+        <Card className="mt-6">
+          <CardHeader title="Synced Asana tasks" subtitle={`${mirror.length} tasks mirrored from the approvals project · refreshed by Sync now and the “Asana sync” scheduled task`} />
+          <Table>
+            <thead><tr><Th>Task</Th><Th>Section</Th><Th>Assignee</Th><Th>Due</Th><Th>Status</Th><Th>Linked PO</Th><Th>Modified</Th></tr></thead>
+            <tbody>
+              {mirror.map((t) => (
+                <Tr key={t.gid}>
+                  <Td>{t.permalinkUrl ? <a href={t.permalinkUrl} target="_blank" rel="noopener" className="text-blue hover:underline">{t.name}</a> : t.name}</Td>
+                  <Td>{t.section || "—"}</Td>
+                  <Td>{t.assignee || "—"}</Td>
+                  <Td>{t.dueOn ?? "—"}</Td>
+                  <Td><Badge tone={t.completed ? "ok" : "warn"}>{t.completed ? "completed" : "open"}</Badge></Td>
+                  <Td mono>{t.poId ? <Link href={`/purchase-orders/${t.poId}`} className="text-blue hover:underline">open PO</Link> : "—"}</Td>
+                  <Td className="text-ink-faint">{dateTime(t.modifiedAt)}</Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
+      ) : null}
     </>
   );
 }

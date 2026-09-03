@@ -19,8 +19,9 @@ export const dynamic = "force-dynamic";
 
 const INVOICE_COLORS: Record<string, string> = { draft: CHART.grey, received: CHART.sky, matched: CHART.blue, approved: CHART.wave, paid: CHART.ok, disputed: CHART.bad };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireAction("dashboard.view");
+  const denied = (await searchParams).denied;
   const [data, company] = await Promise.all([dashboardData(), getCompanySettings()]);
   const k = data.kpis;
   const hour = new Date().getHours();
@@ -43,6 +44,7 @@ export default async function DashboardPage() {
       </section>
 
       <div className="relative z-10 -mt-16 px-6 lg:px-8">
+        {denied ? <div className="mb-4 rounded-card border border-warn-fg/20 bg-warn-bg px-4 py-3 text-[13.5px] text-warn-fg" role="status">Your role ({user.role}) does not have access to that page ({String(denied)}). Ask an administrator if you need it.</div> : null}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard label="Open purchase orders" value={num(k.openPos.n)} sub={`${money(k.openPos.value)} committed`} href="/purchase-orders?status=open" />
           <KpiCard label="Awaiting approval" value={num(k.pendingApprovals)} sub={k.pendingApprovals ? "Managers have been emailed" : "Inbox is clear"} tone={k.pendingApprovals ? "warn" : "ok"} href="/purchase-orders?status=pending_approval" />

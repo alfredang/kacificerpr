@@ -450,6 +450,26 @@ export const chatMessages = pgTable(
   (t) => [index("chat_user_idx").on(t.userId, t.createdAt), index("chat_ext_idx").on(t.externalChatId, t.createdAt)],
 );
 
+export const asanaTasks = pgTable(
+  "asana_tasks",
+  {
+    gid: text("gid").primaryKey(),
+    name: text("name").notNull(),
+    notes: text("notes").notNull().default(""),
+    completed: boolean("completed").notNull().default(false),
+    completedAt: ts("completed_at"),
+    dueOn: date("due_on", { mode: "string" }),
+    assignee: text("assignee").notNull().default(""),
+    section: text("section").notNull().default(""),
+    permalinkUrl: text("permalink_url").notNull().default(""),
+    projectGid: text("project_gid").notNull().default(""),
+    poId: uuid("po_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
+    modifiedAt: ts("modified_at"),
+    syncedAt: ts("synced_at").notNull().defaultNow(),
+  },
+  (t) => [index("asana_tasks_po_idx").on(t.poId), index("asana_tasks_synced_idx").on(t.syncedAt)],
+);
+
 /* --------------------------------------------------------- crons / webhooks */
 export const scheduledTasks = pgTable("scheduled_tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -603,3 +623,4 @@ export type Invoice = typeof invoices.$inferSelect;
 export type AgentRun = typeof agentRuns.$inferSelect;
 export type ScheduledTask = typeof scheduledTasks.$inferSelect;
 export type WebhookEndpoint = typeof webhookEndpoints.$inferSelect;
+export type AsanaTaskRow = typeof asanaTasks.$inferSelect;

@@ -32,6 +32,7 @@ export async function createInvoiceAction(_prev: ActionResult, formData: FormDat
   try {
     lines = JSON.parse(String(formData.get("lines") ?? "[]"));
   } catch {}
+  if (Array.isArray(lines)) lines = lines.filter((l) => l && typeof l === "object" && String((l as { description?: string }).description ?? "").trim() && Number((l as { qty?: number }).qty) > 0);
   const parsed = schema.safeParse({
     invoiceNumber: formData.get("invoiceNumber"),
     vendorId: formData.get("vendorId"),

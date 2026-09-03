@@ -26,10 +26,10 @@
 | **Vendors · SKUs · stock** | Lead times, terms, spend and risk per vendor; SKUs with preferred vendor, reorder level/qty and stock per depot; every stock change is a movement row |
 | **Low stock** | Network-wide shortfall grouped by preferred vendor with **one-click Generate PO** |
 | **Process timeline** | Horizontal procure-to-pay flow with live counts per stage, human gates and agent-assisted stages highlighted, plus a company-wide event timeline |
-| **Asana** | Kanban board of PO approval tasks (demo cards until a PAT is configured); tasks are created on submit and completed on decision |
+| **Asana** | Kanban board of PO approval tasks (demo cards until a PAT is configured); tasks are created on submit and completed on decision; **Sync now** (and the scheduled job) mirrors the project into the `asana_tasks` table and approves POs whose task was completed in Asana |
 | **AI agents (DeepSeek)** | Draft a PO from plain language, reorder recommendations, invoice-match assistant, vendor risk summary, and a co-pilot chat — every run is logged and **nothing is written until a person clicks Apply** |
 | **Hermes widget + Telegram** | Bottom-right chat that answers from live data; the same agent runs as a Telegram bot (token in Settings) |
-| **Company settings** | Company profile & approval threshold, **users & roles**, integrations (DeepSeek, Asana, Resend, Telegram — encrypted at rest with *Test connection*), **API keys**, **scheduled tasks** (cron), **webhooks** (signed, retried) |
+| **Company settings** | Company profile & approval threshold, **Delete demo data** (danger zone), **users & roles**, integrations (DeepSeek, Asana, Resend, Telegram — encrypted at rest with *Test connection*), **API keys**, **scheduled tasks** (cron), **webhooks** (signed, retried) |
 | **External API** | `/api/v1` REST with OpenAPI 3.1 + an MCP endpoint (`/api/v1/mcp`) so agents such as Hermes can query stock/POs and raise or approve purchase orders — see [docs/HERMES.md](docs/HERMES.md) |
 
 Roles: `admin` (everything, incl. settings), `manager` (approve), `procurement` (order/receive, masters), `finance` (invoices, pay, close), `sales` / `requester` (raise POs), `operations` (receive, stock), `viewer`.

@@ -116,8 +116,8 @@ async function mockRun(kind: AgentKind, input: { prompt?: string; invoiceId?: st
     return { proposal: null, summary: `[mock] ${v.name}: ${v.disputedInvoices ? "medium" : "low"} risk — ${v.disputedInvoices ?? 0} disputed invoice(s), ${v.leadTimeDays}-day lead time.`, toolCalls };
   }
   toolCalls.push("dashboard_summary");
-  const k = (await runTool("dashboard_summary", {})) as Record<string, unknown>;
-  return { proposal: null, summary: `[mock] ${JSON.stringify(k)}`, toolCalls };
+  const k = (await runTool("dashboard_summary", {})) as { openPos: { n: number; value: number }; pendingApprovals: number; spendMtd: { value: number }; invoicesDue: { n: number; overdue: number }; lowStock: { n: number } };
+  return { proposal: null, summary: `[mock] Right now there are ${k.openPos.n} open purchase orders worth $${k.openPos.value.toLocaleString()}, ${k.pendingApprovals} awaiting approval, ${k.invoicesDue.n} invoices due this week (${k.invoicesDue.overdue} overdue) and ${k.lowStock.n} SKUs below reorder level. (Mock mode — configure DeepSeek for real answers.)`, toolCalls };
 }
 
 export async function listRuns(limit = 30) {

@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
   // Standalone output is for the Docker image; Vercel's builder handles tracing itself.
   output: process.env.VERCEL ? undefined : "standalone",
   poweredByHeader: false,
+  devIndicators: { position: "top-right" },
   reactStrictMode: true,
   serverExternalPackages: ["@node-rs/argon2", "pg", "ws"],
   async headers() {

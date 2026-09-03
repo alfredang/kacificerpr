@@ -78,9 +78,13 @@ export class ForbiddenError extends Error {
   }
 }
 
+/* Pages, layouts and actions all use this. A forbidden page must never be a
+   500, so the user is sent back to the dashboard with a flag; server actions
+   that reach here also redirect (the UI never shows them a button it can't
+   honour, so this only fires on a hand-crafted request). */
 export async function requireAction(action: Action): Promise<User> {
   const user = await requireUser();
-  if (!can(user.role, action)) throw new ForbiddenError(action);
+  if (!can(user.role, action)) redirect(`/dashboard?denied=${encodeURIComponent(action)}`);
   return user;
 }
 

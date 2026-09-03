@@ -31,6 +31,8 @@ function parsePo(formData: FormData) {
   } catch {
     lines = [];
   }
+  // An untouched "Add line" row must not invalidate an otherwise complete PO.
+  if (Array.isArray(lines)) lines = lines.filter((l) => l && typeof l === "object" && String((l as { description?: string }).description ?? "").trim() && Number((l as { qty?: number }).qty) > 0);
   return poSchema.safeParse({
     vendorId: formData.get("vendorId"),
     warehouseId: formData.get("warehouseId"),

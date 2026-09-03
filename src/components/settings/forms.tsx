@@ -20,6 +20,8 @@ import {
   testEndpointAction,
   testIntegrationAction,
   updateUserAction,
+  purgeDemoDataAction,
+  syncAsanaAction,
   type SettingsResult,
 } from "@/server/actions/settings";
 import { API_SCOPES, ROLES, TASK_KINDS, TASK_KIND_LABEL, WEBHOOK_EVENTS, DEEPSEEK_MODELS, DEEPSEEK_THINKING } from "@/lib/constants";
@@ -222,3 +224,27 @@ export function RedeliverButton({ id }: { id: string }) {
 }
 
 export { Textarea };
+
+export function PurgeDemoForm() {
+  const [state, action, pending] = useActionState<SettingsResult, FormData>(purgeDemoDataAction, {});
+  return (
+    <form action={action} className="space-y-3" noValidate>
+      <Feedback state={state} />
+      <p className="text-[13.5px] text-ink-soft">Deletes every vendor, SKU (with stock and movements), purchase order (with lines, events and approval links), invoice, agent run, chat message, mirrored Asana task and outbox email. Users, company settings, integrations, API keys, scheduled tasks and webhook endpoints are kept. This cannot be undone — re-run <code>pnpm db:seed</code> to restore the demo set.</p>
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label="Type DELETE to confirm" htmlFor="purge-confirm"><Input id="purge-confirm" name="confirm" placeholder="DELETE" autoComplete="off" className="w-40 font-mono" /></Field>
+        <Button type="submit" variant="danger" loading={pending}>Delete demo data</Button>
+      </div>
+    </form>
+  );
+}
+
+export function SyncAsanaButton() {
+  const [state, action, pending] = useActionState<SettingsResult, FormData>(() => syncAsanaAction(), {});
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-3">
+      <Button type="submit" size="sm" loading={pending}>Sync now</Button>
+      {state.error ? <span className="text-[13px] text-bad-fg">{state.error}</span> : state.ok ? <span className="text-[13px] text-ok-fg">{state.message}</span> : null}
+    </form>
+  );
+}

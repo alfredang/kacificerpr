@@ -1,7 +1,7 @@
 import { requireAction } from "@/server/auth/session";
 import { can } from "@/server/auth/rbac";
 import { getCompanySettings } from "@/server/services/settings";
-import { CompanyForm } from "@/components/settings/forms";
+import { CompanyForm, PurgeDemoForm } from "@/components/settings/forms";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Stat } from "@/components/ui/misc";
 import { money } from "@/lib/format";
@@ -12,6 +12,7 @@ export default async function CompanyPage() {
   const user = await requireAction("settings.view");
   const s = await getCompanySettings();
   return (
+    <div className="space-y-5">
     <Card>
       <CardHeader title="Company profile" subtitle="Numbering, approval threshold and match tolerance drive the procurement rules." />
       <CardBody>
@@ -25,5 +26,12 @@ export default async function CompanyPage() {
         )}
       </CardBody>
     </Card>
+    {can(user.role, "settings.manage") ? (
+      <Card className="border-bad-fg/30">
+        <CardHeader title="Danger zone — demo data" subtitle="Start from a clean database before entering real vendors, SKUs and orders" />
+        <CardBody><PurgeDemoForm /></CardBody>
+      </Card>
+    ) : null}
+    </div>
   );
 }

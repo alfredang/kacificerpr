@@ -55,7 +55,7 @@ export function PoForm({
   return (
     <form action={formAction} className="space-y-6" noValidate>
       {state.error ? <Alert tone="bad">{state.error}</Alert> : null}
-      <input type="hidden" name="lines" value={JSON.stringify(lines.map((l) => ({ skuId: l.skuId, description: l.description, qty: l.qty, unitCost: l.unitCost })))} />
+      <input type="hidden" name="lines" value={JSON.stringify(lines.filter((l) => l.description.trim() && l.qty > 0).map((l) => ({ skuId: l.skuId, description: l.description, qty: l.qty, unitCost: l.unitCost })))} />
       {initial?.source ? <input type="hidden" name="source" value={initial.source} /> : null}
 
       <div className="grid gap-4 md:grid-cols-3">

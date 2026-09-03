@@ -13,6 +13,12 @@ export function PoActionsPanel({ poId, actions, lines }: { poId: string; actions
   const [open, setOpen] = useState<PoAction | null>(null);
   const bound = poTransitionAction.bind(null, poId, open ?? "");
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(bound, {});
+  // Close the confirm panel once the action succeeds (derived state, no effect).
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.ok) setOpen(null);
+  }
 
   if (actions.length === 0) return null;
   const variant = (a: PoAction) => (a === "approve" ? "success" : a === "reject" || a === "cancel" ? "danger" : a === "submit" || a === "order" || a === "receive" || a === "close" ? "primary" : "ghost");

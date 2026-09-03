@@ -2,7 +2,8 @@ import { resolveIntegration } from "@/server/services/settings";
 
 const BASE = "https://app.asana.com/api/1.0";
 
-export type AsanaTask = { gid: string; name: string; completed: boolean; permalink_url?: string; due_on?: string | null };
+export type AsanaTask = { gid: string; name: string; completed: boolean; completed_at?: string | null; permalink_url?: string; due_on?: string | null; notes?: string; modified_at?: string; assignee?: { name: string } | null; memberships?: { section?: { name: string } | null }[] };
+const TASK_FIELDS = "name,completed,completed_at,permalink_url,due_on,notes,modified_at,assignee.name,memberships.section.name";
 
 async function client() {
   const cfg = await resolveIntegration("asana");
@@ -56,20 +57,24 @@ export async function getAsanaTask(gid: string): Promise<AsanaTask | null> {
   const c = await client();
   if (!c.enabled || c.mock || !c.secret || gid.startsWith("mock-")) return null;
   try {
-    return await call<AsanaTask>(c.secret, `/tasks/${gid}?opt_fields=name,completed,permalink_url,due_on`);
+    return await call<AsanaTask>(c.secret, `/tasks/${gid}?opt_fields=${TASK_FIELDS}`);
   } catch {
     return null;
   }
 }
 
-export async function listProjectTasks(limit = 50): Promise<AsanaTask[]> {
+export async function listProjectTasks(limit = 100): Promise<AsanaTask[]> {
   const c = await client();
   if (!c.enabled || c.mock || !c.secret || !c.config.projectGid) return [];
   try {
-    return await call<AsanaTask[]>(c.secret, `/projects/${c.config.projectGid}/tasks?opt_fields=name,completed,permalink_url,due_on&limit=${limit}`);
+    return await call<AsanaTask[]>(c.secret, `/projects/${c.config.projectGid}/tasks?opt_fields=${TASK_FIELDS}&limit=${limit}`);
   } catch {
     return [];
   }
+}
+
+export async function asanaProjectGid() {
+  return (await client()).config.projectGid ?? "";
 }
 
 const DEFAULT_PROJECT_NAME = "Kacific ERP — PO approvals";

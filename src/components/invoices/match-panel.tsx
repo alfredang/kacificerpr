@@ -10,17 +10,23 @@ import { invoiceTransitionAction } from "@/server/actions/invoice";
 import type { ActionResult } from "@/server/actions/po";
 import type { Invoice } from "@/db/schema";
 
-const LAMPS: { key: keyof NonNullable<Invoice["match"]>; label: string; desc: string }[] = [
-  { key: "poMatch", label: "Purchase order", desc: "Linked PO exists and the vendor matches" },
-  { key: "qtyMatch", label: "Quantity ordered", desc: "Invoiced quantities do not exceed the PO" },
-  { key: "receiptMatch", label: "Goods receipt", desc: "Invoiced quantities were actually received" },
-  { key: "priceMatch", label: "Unit price", desc: "Within the price tolerance in company settings" },
+const LAMPS: { key: keyof NonNullable<Invoice["match"]>; label: string; desc: string; fail: string }[] = [
+  { key: "poMatch", label: "Purchase order", desc: "Linked PO exists and the vendor matches", fail: "No matching purchase order, or the vendor differs" },
+  { key: "qtyMatch", label: "Quantity ordered", desc: "Invoiced quantities do not exceed the PO", fail: "Invoiced more than was ordered" },
+  { key: "receiptMatch", label: "Goods receipt", desc: "Invoiced quantities were actually received", fail: "Invoiced more than has been received" },
+  { key: "priceMatch", label: "Unit price", desc: "Within the price tolerance in company settings", fail: "Unit price outside the tolerance" },
 ];
 
 export function MatchPanel({ invoice, actions }: { invoice: Pick<Invoice, "id" | "status" | "match" | "total">; actions: string[] }) {
   const [open, setOpen] = useState<string | null>(null);
   const bound = invoiceTransitionAction.bind(null, invoice.id, open ?? "");
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(bound, {});
+  // Close the confirm panel once the action succeeds (derived state, no effect).
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.ok) setOpen(null);
+  }
   const m = invoice.match;
   const label: Record<string, string> = { match: "Run 3-way match", approve: "Approve for payment", pay: "Mark as paid", dispute: "Dispute", reopen: "Reopen" };
   const variant = (a: string) => (a === "approve" || a === "pay" ? "success" : a === "dispute" ? "danger" : a === "match" ? "primary" : "ghost");
@@ -33,18 +39,20 @@ export function MatchPanel({ invoice, actions }: { invoice: Pick<Invoice, "id" |
             <li key={l.key} className={`flex gap-3 rounded-card border px-3 py-2.5 ${ok === null ? "border-line bg-wash" : ok ? "border-ok-fg/20 bg-ok-bg" : "border-bad-fg/20 bg-bad-bg"}`}>
               {ok === null ? <span className="mt-0.5 size-4 rounded-full border-2 border-line-strong" /> : ok ? <CheckCircle2 className="mt-0.5 size-4 text-ok-fg" /> : <XCircle className="mt-0.5 size-4 text-bad-fg" />}
               <div>
-                <p className="text-[13px] font-medium">{l.label}</p>
-                <p className="text-[12px] text-ink-soft">{l.desc}</p>
+                <p className="text-[13px] font-medium">{l.label}{ok === null ? "" : ok ? " — pass" : " — fail"}</p>
+                <p className="text-[12px] text-ink-soft">{ok === false ? l.fail : l.desc}</p>
               </div>
             </li>
           );
         })}
       </ul>
       {m ? (
-        <p className="text-[13px] text-ink-soft">
-          Variance vs PO: <strong className={m.variance === 0 ? "text-ok-fg" : "text-warn-fg"}>{money(m.variance)}</strong> · checked {new Date(m.checkedAt).toLocaleString()}
+        <div className="text-[13px] text-ink-soft">
+          <p>
+            Variance vs PO: <strong className={m.variance === 0 ? "text-ok-fg" : "text-warn-fg"}>{money(m.variance)}</strong> · checked {new Date(m.checkedAt).toLocaleString()}
+          </p>
           {m.notes.length ? <ul className="mt-1 list-disc pl-5">{m.notes.map((n) => <li key={n}>{n}</li>)}</ul> : null}
-        </p>
+        </div>
       ) : (
         <p className="text-[13px] text-ink-faint">Not matched yet.</p>
       )}
