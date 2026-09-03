@@ -91,14 +91,20 @@ export async function saveIntegrationAction(_p: SettingsResult, formData: FormDa
 }
 
 export async function testIntegrationAction(provider: string): Promise<SettingsResult> {
-  await requireAction("settings.manage");
+  const user = await requireAction("settings.manage");
   const p = z.enum(INTEGRATION_PROVIDERS).safeParse(provider);
   if (!p.success) return { error: "Unknown provider" };
   const cfg = await resolveIntegration(p.data);
-  let result = { ok: false, message: "No API key configured." };
+  let result: { ok: boolean; message: string; patch?: Record<string, string> } = { ok: false, message: "No API key configured." };
   if (cfg.secret) {
     if (p.data === "deepseek") result = await testDeepseek(cfg.secret, cfg.config.model);
-    else if (p.data === "asana") result = await testAsana(cfg.secret, cfg.config);
+    else if (p.data === "asana") {
+      result = await testAsana(cfg.secret, cfg.config);
+      // Persist anything the test resolved (workspace / auto-created project).
+      if (result.ok && result.patch && Object.keys(result.patch).length) {
+        await saveIntegration("asana", { enabled: true, config: { ...cfg.config, ...result.patch }, updatedBy: user.id });
+      }
+    }
     else if (p.data === "telegram") result = await testTelegram(cfg.secret, cfg.config);
     else {
       try {

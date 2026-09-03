@@ -72,16 +72,58 @@ export async function listProjectTasks(limit = 50): Promise<AsanaTask[]> {
   }
 }
 
+const DEFAULT_PROJECT_NAME = "Kacific ERP — PO approvals";
+
+/* Personal Asana workspaces have no teams, so projects are created with
+   `workspace`; organisations need `team`. Both are handled here. */
+export async function ensureAsanaProject(pat: string, workspaceGid: string) {
+  const existing = await call<{ gid: string; name: string }[]>(pat, `/projects?workspace=${workspaceGid}&archived=false&opt_fields=name&limit=100`);
+  const found = existing.find((p) => p.name === DEFAULT_PROJECT_NAME);
+  if (found) return { gid: found.gid, created: false };
+  const ws = await call<{ is_organization: boolean }>(pat, `/workspaces/${workspaceGid}?opt_fields=is_organization`);
+  const data: Record<string, unknown> = {
+    name: DEFAULT_PROJECT_NAME,
+    notes: "Purchase-order approval tasks created automatically by Kacific ERP. A task is created when a PO is submitted and completed when it is approved or rejected; completing a task in Asana approves the PO on the next sync.",
+    default_view: "board",
+    color: "dark-blue",
+  };
+  if (ws.is_organization) {
+    const teams = await call<{ gid: string }[]>(pat, `/organizations/${workspaceGid}/teams?limit=1`);
+    if (!teams[0]) throw new Error("No team found in the Asana organisation to own the project");
+    data.team = teams[0].gid;
+  } else {
+    data.workspace = workspaceGid;
+  }
+  const project = await call<{ gid: string }>(pat, "/projects", { method: "POST", body: JSON.stringify({ data }) });
+  for (const name of ["Awaiting approval", "Approved", "Ordered", "Done"]) {
+    await call(pat, `/projects/${project.gid}/sections`, { method: "POST", body: JSON.stringify({ data: { name } }) }).catch(() => {});
+  }
+  return { gid: project.gid, created: true };
+}
+
+/* Test connection also self-configures: resolves the workspace from the PAT
+   when none is set and creates the approvals project when none is set. The
+   returned `config` patch is persisted by the settings action. */
 export async function testAsana(pat: string, config: Record<string, string>) {
   try {
-    const me = await call<{ name: string; email: string }>(pat, "/users/me");
+    const me = await call<{ name: string; email: string; workspaces: { gid: string; name: string }[] }>(pat, "/users/me?opt_fields=name,email,workspaces.name");
+    const patch: Record<string, string> = {};
+    let workspaceGid = config.workspaceGid;
+    if (!workspaceGid) {
+      workspaceGid = me.workspaces[0]?.gid ?? "";
+      if (workspaceGid) patch.workspaceGid = workspaceGid;
+    }
     let project = "";
     if (config.projectGid) {
       const p = await call<{ name: string }>(pat, `/projects/${config.projectGid}?opt_fields=name`);
       project = ` · project “${p.name}”`;
+    } else if (workspaceGid) {
+      const ensured = await ensureAsanaProject(pat, workspaceGid);
+      patch.projectGid = ensured.gid;
+      project = ` · ${ensured.created ? "created" : "found"} project “${DEFAULT_PROJECT_NAME}” (${ensured.gid})`;
     }
-    return { ok: true, message: `Connected as ${me.name} (${me.email})${project}` };
+    return { ok: true, message: `Connected as ${me.name} (${me.email})${project}`, patch };
   } catch (err) {
-    return { ok: false, message: err instanceof Error ? err.message : String(err) };
+    return { ok: false, message: err instanceof Error ? err.message : String(err), patch: {} };
   }
 }
