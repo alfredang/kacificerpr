@@ -1,0 +1,7 @@
+# Vercel builds must never see local env files — production config lives in Vercel env vars.
+.env.local
+.env.docker
+.env
+test-results
+playwright-report
+.playwright-mcp

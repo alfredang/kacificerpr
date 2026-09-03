@@ -54,14 +54,26 @@ export function Sidebar({ permissions, pendingApprovals, user }: { permissions: 
       )}
       aria-label="Primary"
     >
-      <div className={cn("flex h-16 items-center border-b border-white/10", collapsed ? "justify-center px-2" : "px-5")}>
-        <Link href="/dashboard" className="flex items-center gap-2" aria-label="Kacific ERP dashboard">
+      <div className={cn("flex h-16 items-center border-b border-white/10", collapsed ? "flex-col justify-center gap-1 px-1 py-1" : "justify-between px-4")}>
+        <Link href="/dashboard" className="flex items-center" aria-label="Kacific ERP dashboard">
           {collapsed ? (
-            <Image src="/icon.png" alt="" width={28} height={28} className="rounded-sm" />
+            <span className="flex size-8 items-center justify-center rounded-full bg-white text-[15px] font-bold text-blue" aria-hidden>
+              K
+            </span>
           ) : (
             <Image src="/kacific-logo.png" alt="Kacific" width={120} height={43} priority className="brightness-0 invert" />
           )}
         </Link>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-pressed={collapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="rounded-card p-1.5 text-white/80 hover:bg-white/10 hover:text-white"
+        >
+          {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3">
@@ -107,7 +119,7 @@ export function Sidebar({ permissions, pendingApprovals, user }: { permissions: 
           </div>
         ) : null}
         <div className={cn("flex", collapsed ? "flex-col items-center gap-1" : "items-center justify-between")}>
-          <form action={logoutAction}>
+          <form action={logoutAction} className={collapsed ? "" : "flex-1"}>
             <button
               type="submit"
               title="Sign out"
@@ -117,15 +129,6 @@ export function Sidebar({ permissions, pendingApprovals, user }: { permissions: 
               {!collapsed ? "Sign out" : null}
             </button>
           </form>
-          <button
-            type="button"
-            onClick={toggle}
-            aria-pressed={collapsed}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="rounded-card p-2 text-white/80 hover:bg-white/10 hover:text-white"
-          >
-            {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
-          </button>
         </div>
       </div>
     </aside>
