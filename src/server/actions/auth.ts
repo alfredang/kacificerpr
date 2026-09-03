@@ -16,7 +16,14 @@ function safeNext(next?: string) {
 export async function loginAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Enter a valid email address and password." };
-  const result = await login(parsed.data.email, parsed.data.password, await requestIp());
+  let result: Awaited<ReturnType<typeof login>>;
+  try {
+    result = await login(parsed.data.email, parsed.data.password, await requestIp());
+  } catch (err) {
+    // Misconfigured deployment (no DATABASE_URL / AUTH_SECRET) must not surface as a blank 500.
+    console.error("login failed:", err instanceof Error ? err.message : err);
+    return { error: "The service cannot reach its database right now. If this is a new deployment, set DATABASE_URL and AUTH_SECRET in the hosting environment and redeploy." };
+  }
   if (!result.ok) return { error: "Those details did not match an active account. Check them and try again." };
   await createSession(result.user);
   redirect(safeNext(parsed.data.next));
