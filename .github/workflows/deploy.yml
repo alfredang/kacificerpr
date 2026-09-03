@@ -28,8 +28,23 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
+  # Secrets cannot be read in a job-level `if`, so a tiny gate job exposes whether
+  # the Vercel/Neon secrets exist. Until they do, deploy jobs are skipped (not failed).
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          T: ${{ secrets.VERCEL_TOKEN }}
+          N: ${{ secrets.NEON_API_KEY }}
+        run: |
+          if [ -n "$T" ] && [ -n "$N" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"; else echo "ready=false" >> "$GITHUB_OUTPUT"; echo "::notice::Deploy skipped — add VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID, NEON_API_KEY, NEON_PROJECT_ID, DATABASE_URL, APP_ENCRYPTION_KEY as repository secrets."; fi
+
   production:
-    if: github.event_name == 'push'
+    needs: gate
+    if: github.event_name == 'push' && needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -37,7 +52,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 11 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
@@ -56,12 +70,12 @@ jobs:
           curl -fsSI "${{ steps.deploy.outputs.url }}/login" | grep -i "strict-transport-security"
 
   preview:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: gate
+    if: github.event_name == 'pull_request' && github.event.action != 'closed' && needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 11 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
@@ -90,7 +104,8 @@ jobs:
             🗄️ Neon branch: `preview/pr-${{ github.event.number }}` (seeded with the demo data; admin1@kacific.com / admin12345)
 
   cleanup:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    needs: gate
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: neondatabase/delete-branch-action@v3
