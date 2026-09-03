@@ -50,6 +50,7 @@ jobs:
       INTEGRATIONS_MOCK: "1"
       AI_MOCK: "1"
       LOGIN_RATE_LIMIT: "200"
+      ALLOW_DEV_MAILBOX: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

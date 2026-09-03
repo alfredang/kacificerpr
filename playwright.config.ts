@@ -23,6 +23,6 @@ export default defineConfig({
         url: "http://localhost:3000/api/health",
         reuseExistingServer: true,
         timeout: 120_000,
-        env: { EMAIL_TRANSPORT: "outbox", INTEGRATIONS_MOCK: "1", AI_MOCK: "1", LOGIN_RATE_LIMIT: "200" },
+        env: { EMAIL_TRANSPORT: "outbox", INTEGRATIONS_MOCK: "1", AI_MOCK: "1", LOGIN_RATE_LIMIT: "200", ALLOW_DEV_MAILBOX: "1" },
       },
 });
