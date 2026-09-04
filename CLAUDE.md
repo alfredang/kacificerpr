@@ -76,7 +76,10 @@ src/db/schema.ts             Drizzle schema · drizzle/ migrations · scripts/se
 - **One tool registry, three surfaces.** Add a capability once in `tools.ts`; REST
   routes, MCP and DeepSeek all pick it up.
 - **Every boundary is Zod-validated** (server actions, API bodies, tool inputs).
-- **Emails always land in `email_outbox`**; `EMAIL_TRANSPORT=outbox` sends nothing.
+- **Emails always land in `email_outbox`**; transport is a Settings → Integrations
+  choice (Resend enabled + a valid key sends for real), not an env var — the only
+  env override left is `INTEGRATIONS_MOCK=1` for tests, which always forces the
+  outbox and sends nothing.
 - **Brand:** colours/radii come from the `@theme` tokens; status colours stay
   green/amber/red; Montserrat 300/500/600/700; uppercase only on buttons/headers.
 - **Next 16 conventions:** `proxy.ts` (not middleware), async `params`/`searchParams`,
@@ -86,8 +89,9 @@ src/db/schema.ts             Drizzle schema · drizzle/ migrations · scripts/se
 
 `tests/unit` (Vitest) covers the pure logic: state machine, RBAC, crypto, 3-way match,
 signing, password policy. `tests/e2e` (Playwright) drives the real app against the
-seeded local DB with `INTEGRATIONS_MOCK=1 AI_MOCK=1 EMAIL_TRANSPORT=outbox
-LOGIN_RATE_LIMIT=200` and reads approval/reset links from `/dev/mailbox`. If logins
+seeded local DB with `INTEGRATIONS_MOCK=1 AI_MOCK=1 LOGIN_RATE_LIMIT=200` (which
+forces the outbox and stubs Resend/Asana/DeepSeek) and reads approval/reset links
+from `/dev/mailbox`. If logins
 start failing during repeated runs, clear `rate_limits`. `/e2e` launches the
 Playwright-MCP QA agent for an exploratory pass.
 

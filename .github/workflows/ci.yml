@@ -46,7 +46,6 @@ jobs:
       APP_ENCRYPTION_KEY: Y2ktZW5jcnlwdGlvbi1rZXktY2ktZW5jcnlwdGlvbi1rZXk=
       CRON_SECRET: ci-cron-secret
       APP_URL: http://localhost:3000
-      EMAIL_TRANSPORT: outbox
       INTEGRATIONS_MOCK: "1"
       AI_MOCK: "1"
       LOGIN_RATE_LIMIT: "200"

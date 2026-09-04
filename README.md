@@ -70,7 +70,7 @@ Then open **http://localhost:3000** and sign in:
 | `finance@kacific.example` | `Kacific2026!` | finance — invoices, pay, close |
 | `requester@kacific.example` · `viewer@kacific.example` | `Kacific2026!` | requester · read-only |
 
-Useful: `docker compose --profile app logs -f app` · `docker compose --profile app down` (keeps data) · `down -v` (wipe) · `run --rm migrate` (re-seed). Emails the app sends (approval links, resets) are visible at http://localhost:3000/dev/mailbox while `EMAIL_TRANSPORT=outbox`. Full guide: [docs/DOCKER.md](docs/DOCKER.md).
+Useful: `docker compose --profile app logs -f app` · `docker compose --profile app down` (keeps data) · `down -v` (wipe) · `run --rm migrate` (re-seed). Emails the app sends (approval links, resets) are visible at http://localhost:3000/dev/mailbox until Resend is enabled with a key in Settings → Integrations. Full guide: [docs/DOCKER.md](docs/DOCKER.md).
 
 ## Local development (Node + Docker Postgres)
 
@@ -100,7 +100,7 @@ Configure under **Settings → Integrations** (stored AES-256-GCM encrypted; *Te
 | --- | --- | --- |
 | **DeepSeek** | Agentic processes and the Hermes chat (`deepseek-v4-flash` / `deepseek-v4-pro`, tool calling) | `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` |
 | **Asana** | Approval tasks (created on submit, completed on decision); kanban board; inbound webhook `/api/webhooks/asana`. *Test connection* auto-creates the “Kacific ERP — PO approvals” project | `ASANA_PAT` (+ optional `ASANA_WORKSPACE_GID`, `ASANA_PROJECT_GID`) |
-| **Resend** | Approval requests with one-click links, decisions, password resets, invitations, digests | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TRANSPORT=resend` |
+| **Resend** | Approval requests with one-click links, decisions, password resets, invitations, digests | `RESEND_API_KEY`/`EMAIL_FROM` env vars, or Settings → Integrations (recommended — also needs "Enabled" checked there) |
 | **Telegram** | Hermes chatbot in Telegram (`/api/webhooks/telegram`), allow-listed chat ids | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_ALLOWED_CHAT_IDS`, `TELEGRAM_WEBHOOK_SECRET` |
 
 Without keys the app runs in demo mode (outbox emails, sample Asana cards, agents disabled or `AI_MOCK=1`).

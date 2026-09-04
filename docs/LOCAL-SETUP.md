@@ -82,6 +82,6 @@ Add keys under **Settings → Integrations** (stored encrypted) or in `.env.loca
 | DeepSeek | `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL=deepseek-v4-flash
 DEEPSEEK_THINKING=disabled` | Agents page shows "not configured"; `AI_MOCK=1` gives canned runs |
 | Asana | `ASANA_PAT`, `ASANA_PROJECT_GID` (or `ASANA_WORKSPACE_GID`) | Board shows demo cards from seeded POs |
-| Resend | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TRANSPORT=resend` | `EMAIL_TRANSPORT=outbox` keeps everything in `/dev/mailbox` |
+| Resend | `RESEND_API_KEY` env var, or Settings → Integrations (recommended) | Leaving it disabled/unconfigured keeps everything in `/dev/mailbox` |
 
 Set `INTEGRATIONS_MOCK=1` to stub all three in-process (used by the e2e suite).
