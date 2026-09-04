@@ -27,3 +27,6 @@ desktop.ini
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Agent-generated monitoring output
+stock-alerts.csv

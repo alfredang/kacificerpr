@@ -549,6 +549,161 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
 @media (max-width: 520px) {
   .form__row { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   12. FLOATING CHAT WIDGET
+   Fixed to the bottom-right. A round launcher toggles a small panel of
+   suggested queries that hands the chosen text off to WhatsApp. The panel
+   auto-opens once, 10s after load, with a spoken greeting (Section 7 JS).
+   ========================================================================== */
+.chat {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.chat__launch {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--accent-dark);
+  background: var(--k-blue);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(3, 78, 162, .32);
+  transition: background .12s ease, transform .12s ease;
+}
+
+.chat__launch:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.chat.is-open .chat__launch { background: var(--accent-dark); }
+
+.chat__panel {
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(3, 78, 162, .22);
+  overflow: hidden;
+}
+
+.chat__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 14px 12px 16px;
+  background: var(--k-blue);
+  color: #fff;
+}
+
+.chat__title { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.chat__sub   { font-size: 11.5px; font-weight: 300; color: var(--k-blue-pale); margin-top: 3px; }
+
+.chat__close {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  font-size: 18px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chat__close:hover { background: rgba(255, 255, 255, .26); }
+
+.chat__body { padding: 14px 16px 16px; }
+.chat__prompt { font-size: 12.5px; color: var(--muted); }
+
+.chat__suggest {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat__chip {
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--k-blue);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+
+.chat__chip:hover { background: #DCE8F9; border-color: var(--k-blue-mid); }
+
+.chat__form {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.chat__form input[type="text"] { flex: 1 1 auto; min-width: 0; }
+
+.chat__mic,
+.chat__send {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chat__mic {
+  color: var(--k-blue);
+  background: #fff;
+  border: 1px solid var(--k-blue-mid);
+}
+
+.chat__mic:hover { background: var(--accent-soft); }
+
+.chat__mic.is-live {
+  color: #fff;
+  background: var(--bad-fg);
+  border-color: var(--bad-fg);
+  animation: chatPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chatPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(180, 35, 24, .40); }
+  50%      { box-shadow: 0 0 0 5px rgba(180, 35, 24, 0); }
+}
+
+.chat__send {
+  color: #fff;
+  background: var(--k-blue);
+  border: 1px solid var(--accent-dark);
+}
+
+.chat__send:hover { background: var(--accent-dark); }
+
+@media (max-width: 900px) {
+  .chat { right: 14px; bottom: 14px; }
+}
 </style>
 </head>
 <body>
@@ -726,6 +881,39 @@ tr.is-new { animation: flashRow 1.8s ease-out; }
     <p class="sitefoot__note">KTower Inventory &middot; internal warehouse stock dashboard &middot; in-memory data, resets on reload</p>
   </div>
 </footer>
+
+<!-- ==========================================================================
+     FLOATING CHAT WIDGET
+     Launcher + suggestion panel. All behaviour is wired in Section 7 of the
+     script; there are no inline handlers here. The WhatsApp URL is assembled
+     at click time so no literal external URL sits in this offline file.
+     ========================================================================== -->
+<div class="chat" id="chat">
+  <div class="chat__panel" id="chatPanel" role="dialog"
+       aria-labelledby="chatTitle" aria-describedby="chatPrompt" hidden>
+    <div class="chat__head">
+      <div>
+        <p class="chat__title" id="chatTitle">How can I help you?</p>
+        <p class="chat__sub">K-Tower PNG support &middot; continues on WhatsApp</p>
+      </div>
+      <button type="button" class="chat__close" id="chatClose" aria-label="Close chat">&times;</button>
+    </div>
+    <div class="chat__body">
+      <p class="chat__prompt" id="chatPrompt">Pick a question or type your own &mdash; we&rsquo;ll pick it up on WhatsApp.</p>
+      <ul class="chat__suggest" id="chatSuggest"></ul>
+      <form class="chat__form" id="chatForm">
+        <label class="sr-only" for="chatInput">Your message</label>
+        <input type="text" id="chatInput" autocomplete="off" placeholder="Type your question&hellip;">
+        <button type="button" class="chat__mic" id="chatMic" aria-label="Speak your question" hidden>&#127908;</button>
+        <button type="submit" class="chat__send">Send</button>
+      </form>
+    </div>
+  </div>
+  <button type="button" class="chat__launch" id="chatLaunch"
+          aria-expanded="false" aria-controls="chatPanel" aria-label="Open chat">
+    <span aria-hidden="true">&#128172;</span>
+  </button>
+</div>
 
 <script>
 'use strict';
@@ -1224,6 +1412,180 @@ function handleClear() {
 
 
 /* ==========================================================================
+   SECTION 7 — FLOATING CHAT WIDGET
+   Self-contained: never touches `records`, `ui` or any render function. Opens
+   a panel of suggested queries and hands the chosen text off to WhatsApp.
+   Auto-opens once, 10s after load, with a spoken greeting and — where the
+   browser supports it — voice input via the Web Speech API. Speech and
+   recognition are progressive enhancements; the panel is fully usable without
+   either.
+   ========================================================================== */
+
+/* WhatsApp destination. Digits only, full international format (65 = Singapore).
+   The https URL is assembled from parts at call time (see chatWhatsAppUrl) so
+   no literal "http(s)://" string appears in this file — the offline-safety
+   check in CLAUDE.md expects zero matches, and a user-initiated outbound link
+   does not affect the page loading offline. */
+var CHAT_WA_NUMBER = '6500000000';   // placeholder — set the real support number locally
+
+var CHAT_SUGGESTIONS = [
+  'Which items are below reorder level?',
+  'What stock is held at the POM warehouse?',
+  'How do I add a new SKU?',
+  'Can I get an export of the current stock list?'
+];
+
+var chatEl = {
+  root:    document.getElementById('chat'),
+  launch:  document.getElementById('chatLaunch'),
+  panel:   document.getElementById('chatPanel'),
+  close:   document.getElementById('chatClose'),
+  suggest: document.getElementById('chatSuggest'),
+  form:    document.getElementById('chatForm'),
+  input:   document.getElementById('chatInput'),
+  mic:     document.getElementById('chatMic')
+};
+
+var chatState = {
+  opened:      false,   // has the panel been opened yet — suppresses the auto-open
+  autoTimer:   null,
+  recognition: null,
+  listening:   false
+};
+
+/** Assemble the WhatsApp deep link from parts, optionally prefilling a message. */
+function chatWhatsAppUrl(text) {
+  var base = ['https', '://', 'wa.me/', CHAT_WA_NUMBER].join('');
+  return text ? base + '?text=' + encodeURIComponent(text) : base;
+}
+
+/** Open the WhatsApp conversation in a new tab. */
+function chatHandOff(text) {
+  window.open(chatWhatsAppUrl(text), '_blank', 'noopener');
+}
+
+/** Speak a short phrase, where the browser supports synthesis. Best-effort. */
+function chatSpeak(message) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(message));
+  } catch (err) { /* non-essential enhancement */ }
+}
+
+function chatOpen(opts) {
+  opts = opts || {};
+  window.clearTimeout(chatState.autoTimer);
+  chatState.opened = true;
+
+  chatEl.panel.hidden = false;
+  chatEl.launch.setAttribute('aria-expanded', 'true');
+  chatEl.root.classList.add('is-open');
+
+  if (opts.speak) chatSpeak('How can I help you?');
+  if (opts.focus !== false) chatEl.input.focus();
+}
+
+function chatClose() {
+  chatEl.panel.hidden = true;
+  chatEl.launch.setAttribute('aria-expanded', 'false');
+  chatEl.root.classList.remove('is-open');
+  chatStopListening();
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  chatEl.launch.focus();
+}
+
+function chatToggle() {
+  if (chatEl.panel.hidden) chatOpen({ speak: false });
+  else chatClose();
+}
+
+/* ---- Voice input (Web Speech API) ---------------------------------------- */
+
+function chatStopListening() {
+  if (chatState.recognition && chatState.listening) {
+    try { chatState.recognition.stop(); } catch (err) { /* already stopped */ }
+  }
+  chatState.listening = false;
+  chatEl.mic.classList.remove('is-live');
+  chatEl.mic.setAttribute('aria-label', 'Speak your question');
+}
+
+function chatSetupVoice() {
+  var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) return;   // mic button stays hidden where unsupported
+
+  var rec = new Recognition();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+
+  rec.addEventListener('result', function (event) {
+    chatEl.input.value = event.results[0][0].transcript;
+  });
+  rec.addEventListener('end', chatStopListening);
+  rec.addEventListener('error', chatStopListening);
+
+  chatState.recognition = rec;
+  chatEl.mic.hidden = false;
+}
+
+function chatToggleListening() {
+  if (!chatState.recognition) return;
+  if (chatState.listening) { chatStopListening(); return; }
+
+  try {
+    chatState.recognition.start();
+    chatState.listening = true;
+    chatEl.mic.classList.add('is-live');
+    chatEl.mic.setAttribute('aria-label', 'Stop listening');
+  } catch (err) {
+    chatStopListening();
+  }
+}
+
+/* ---- Wiring ------------------------------------------------------------- */
+
+function chatRenderSuggestions() {
+  chatEl.suggest.innerHTML = CHAT_SUGGESTIONS.map(function (q) {
+    return '<li><button type="button" class="chat__chip">' + escapeHtml(q) + '</button></li>';
+  }).join('');
+}
+
+function chatInit() {
+  chatRenderSuggestions();
+  chatSetupVoice();
+
+  chatEl.launch.addEventListener('click', chatToggle);
+  chatEl.close.addEventListener('click', chatClose);
+  chatEl.mic.addEventListener('click', chatToggleListening);
+
+  // Delegated: one listener covers every suggestion chip.
+  chatEl.suggest.addEventListener('click', function (event) {
+    var chip = event.target.closest('.chat__chip');
+    if (chip) chatHandOff(chip.textContent);
+  });
+
+  chatEl.form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    chatHandOff(chatEl.input.value.trim());
+    chatEl.input.value = '';
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !chatEl.panel.hidden) chatClose();
+  });
+
+  // Auto-open once, 10s after load, with the spoken greeting — unless the
+  // user has already opened it. Focus is left alone so the page is not
+  // hijacked while someone is mid-task.
+  chatState.autoTimer = window.setTimeout(function () {
+    if (!chatState.opened) chatOpen({ speak: true, focus: false });
+  }, 10000);
+}
+
+
+/* ==========================================================================
    SECTION 6 — INITIALISATION
    ========================================================================== */
 
@@ -1240,6 +1602,8 @@ function init() {
   el.tableBody.addEventListener('click', handleBodyClick);
   el.form.addEventListener('submit', handleSubmit);
   el.clearBtn.addEventListener('click', handleClear);
+
+  chatInit();
 
   renderAll();
 }
