@@ -142,9 +142,7 @@ export async function sendTestEmailAction(_p: SettingsResult, formData: FormData
   const label =
     result.via === "resend"
       ? `Sent via Resend to ${parsed.data.to}${result.providerId ? ` (id ${result.providerId})` : ""}.`
-      : result.via === "console"
-        ? `Logged to the server console, not actually sent (EMAIL_TRANSPORT=console).`
-        : `Queued to the outbox, not actually sent — check /dev/mailbox (Resend isn't the active transport).`;
+      : `Queued to the outbox, not actually sent — check /dev/mailbox (enable Resend above with a valid key to send for real).`;
   return { ok: true, message: label };
 }
 

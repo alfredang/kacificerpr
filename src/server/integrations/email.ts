@@ -4,15 +4,17 @@ import { resolveIntegration } from "@/server/services/settings";
 
 export type Mail = { to: string | string[]; subject: string; html: string; links?: string[] };
 
-/* Transport order: INTEGRATIONS_MOCK / EMAIL_TRANSPORT=outbox|console win, then
-   Resend when enabled in Settings (or via RESEND_API_KEY). Every email is
-   written to email_outbox regardless, which doubles as the audit trail and as
-   the dev mailbox Playwright reads links from. */
+/* Transport is controlled through Settings → Integrations (database), not
+   environment variables: Resend is used whenever it's enabled there with a
+   valid key, otherwise the email falls back to the outbox. The one override
+   left is INTEGRATIONS_MOCK=1, a hard test-mode switch that stubs network
+   calls for automated tests regardless of what's saved in Settings. Every
+   email is written to email_outbox regardless, which doubles as the audit
+   trail and as the dev mailbox Playwright reads links from. */
 export async function sendEmail(mail: Mail) {
   const db = getDb();
   const to = Array.isArray(mail.to) ? mail.to.join(", ") : mail.to;
-  const forced = process.env.INTEGRATIONS_MOCK === "1" ? "outbox" : process.env.EMAIL_TRANSPORT;
-  let via = forced && forced !== "resend" ? forced : "resend";
+  let via: "resend" | "outbox" = process.env.INTEGRATIONS_MOCK === "1" ? "outbox" : "resend";
   let providerId: string | null = null;
   let error: string | null = null;
 
@@ -36,9 +38,6 @@ export async function sendEmail(mail: Mail) {
         error = err instanceof Error ? err.message : String(err);
       }
     }
-  }
-  if (via === "console") {
-    console.log(`[email → ${to}] ${mail.subject}\n${(mail.links ?? []).join("\n")}`);
   }
   await db.insert(emailOutbox).values({
     to,
