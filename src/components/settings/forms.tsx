@@ -17,6 +17,7 @@ import {
   saveEndpointAction,
   saveIntegrationAction,
   saveTaskAction,
+  sendTestEmailAction,
   testEndpointAction,
   testIntegrationAction,
   updateUserAction,
@@ -94,9 +95,10 @@ const INTEGRATION_META: Record<string, { title: string; desc: string; secretLabe
   asana: { title: "Asana (approvals board)", desc: "Creates a task when a PO is submitted and completes it when the PO is decided.", secretLabel: "Personal access token", fields: [{ key: "projectGid", label: "Project GID", hint: "Leave blank — Test connection creates “Kacific ERP — PO approvals” for you" }, { key: "workspaceGid", label: "Workspace GID", hint: "Leave blank to use the PAT’s first workspace" }] },
 };
 
-export function IntegrationCard({ i }: { i: IntegrationView }) {
+export function IntegrationCard({ i, defaultTestEmail }: { i: IntegrationView; defaultTestEmail?: string }) {
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveIntegrationAction, {});
   const [testState, testAction, testing] = useActionState<SettingsResult, FormData>(() => testIntegrationAction(i.provider), {});
+  const [emailState, emailAction, sendingEmail] = useActionState<SettingsResult, FormData>(sendTestEmailAction, {});
   const meta = INTEGRATION_META[i.provider];
   return (
     <div className="rounded-card border border-line bg-white shadow-card">
@@ -135,6 +137,15 @@ export function IntegrationCard({ i }: { i: IntegrationView }) {
         <Button type="submit" size="sm" variant="secondary" loading={testing} disabled={!i.hasSecret}>Test connection</Button>
         {testState.error ? <span className="text-[13px] text-bad-fg">{testState.error}</span> : testState.ok ? <span className="text-[13px] text-ok-fg">{testState.message}</span> : i.lastTestedAt ? <span className={`text-[12.5px] ${i.lastTestOk ? "text-ok-fg" : "text-bad-fg"}`}>Last test {i.lastTestOk ? "passed" : "failed"} · {i.lastTestMessage}</span> : <span className="text-[12.5px] text-ink-faint">Not tested yet</span>}
       </form>
+      {i.provider === "resend" ? (
+        <form action={emailAction} className="flex flex-wrap items-end gap-3 border-t border-line px-5 py-3">
+          <Field label="Send a test email to" htmlFor="resend-test-to" hint="Sends a real message through the current transport — Resend if configured, otherwise the outbox at /dev/mailbox." className="min-w-[240px] flex-1">
+            <Input id="resend-test-to" name="to" type="email" required defaultValue={defaultTestEmail ?? ""} placeholder="you@kacific.com" />
+          </Field>
+          <Button type="submit" size="sm" variant="secondary" loading={sendingEmail}>Send test email</Button>
+          {emailState.error ? <span className="w-full text-[13px] text-bad-fg">{emailState.error}</span> : emailState.ok ? <span className="w-full text-[13px] text-ok-fg">{emailState.message}</span> : null}
+        </form>
+      ) : null}
     </div>
   );
 }

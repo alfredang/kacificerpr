@@ -15,6 +15,7 @@ import { syncAsana } from "@/server/services/asana-sync";
 import { testAsana } from "@/server/integrations/asana";
 import { testDeepseek } from "@/server/integrations/deepseek";
 import { testTelegram } from "@/server/integrations/telegram";
+import { sendTestEmail } from "@/server/integrations/email";
 import { passwordPolicy } from "@/server/security/password";
 import { API_SCOPES, INTEGRATION_PROVIDERS, ROLES, TASK_KINDS, WEBHOOK_EVENTS, type ApiScope, type WebhookEvent } from "@/lib/constants";
 import type { ActionResult } from "./po";
@@ -121,6 +122,25 @@ export async function testIntegrationAction(provider: string): Promise<SettingsR
   await recordIntegrationTest(p.data, result.ok, result.message);
   revalidatePath("/settings/integrations");
   return result.ok ? { ok: true, message: result.message } : { error: result.message };
+}
+
+const testEmailSchema = z.object({ to: z.string().trim().toLowerCase().email().max(200) });
+
+export async function sendTestEmailAction(_p: SettingsResult, formData: FormData): Promise<SettingsResult> {
+  const user = await requireAction("settings.manage");
+  const parsed = testEmailSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Enter a valid email address." };
+  const result = await sendTestEmail(parsed.data.to);
+  const { audit } = await import("@/server/services/audit");
+  await audit({ actor: userActor(user), action: "integration.test_email", entityType: "integration", entityId: "resend", payload: { to: parsed.data.to, via: result.via, ok: !result.error } });
+  if (result.error) return { error: `Send failed: ${result.error}` };
+  const label =
+    result.via === "resend"
+      ? `Sent via Resend to ${parsed.data.to}${result.providerId ? ` (id ${result.providerId})` : ""}.`
+      : result.via === "console"
+        ? `Logged to the server console, not actually sent (EMAIL_TRANSPORT=console).`
+        : `Queued to the outbox, not actually sent — check /dev/mailbox (Resend isn't the active transport).`;
+  return { ok: true, message: label };
 }
 
 export async function createApiKeyAction(_p: SettingsResult, formData: FormData): Promise<SettingsResult> {
