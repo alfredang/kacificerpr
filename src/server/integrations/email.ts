@@ -52,6 +52,21 @@ export async function sendEmail(mail: Mail) {
   return { via, providerId, error };
 }
 
+/* Settings → Integrations "Send test email": proves outbound delivery end to
+   end (not just that the API key is valid) by routing a real message through
+   the same sendEmail() transport every other email in the app uses. */
+export async function sendTestEmail(to: string) {
+  return sendEmail({
+    to,
+    subject: "Kacific ERP — test email",
+    html: shell(
+      "Test email",
+      `<p>This is a test email from Kacific ERP, sent from Settings → Integrations to confirm outbound email delivery is working.</p>
+       <p style="font-size:13px;color:#616161">Sent ${new Date().toISOString()}.</p>`,
+    ),
+  });
+}
+
 /* ------------------------------------------------------------ templates */
 const shell = (title: string, body: string) => `
 <div style="font-family:Montserrat,Segoe UI,Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
