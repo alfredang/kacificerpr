@@ -9,11 +9,13 @@ import type { PoStatus } from "@/lib/constants";
 export function PoStepper({ status, className }: { status: PoStatus; className?: string }) {
   const idx = stageIndex(status);
   const terminalBad = status === "rejected" || status === "cancelled";
+  // "closed" is the terminal success state: the last stage is finished, not in progress.
+  const complete = status === "closed";
   return (
     <ol className={cn("flex w-full items-start", className)} aria-label="Purchase order progress">
       {PO_STAGES.map((stage, i) => {
-        const done = !terminalBad && i < idx;
-        const current = i === idx;
+        const done = !terminalBad && (i < idx || (complete && i === idx));
+        const current = i === idx && !done;
         const bad = terminalBad && current;
         const human = stage.key === "pending_approval";
         return (
