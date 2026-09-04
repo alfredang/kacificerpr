@@ -54,7 +54,7 @@ export async function inviteUserAction(_p: SettingsResult, formData: FormData): 
   try {
     await inviteUser(parsed.data, userActor(user), user.name);
   } catch (err) {
-    if (err instanceof Error && /users_email_idx/.test(err.message)) return { error: "A user with that email already exists." };
+    if (err instanceof Error && /users_email_idx/.test(`${err.message} ${err.cause instanceof Error ? err.cause.message : ""}`)) return { error: "A user with that email already exists." };
     throw err;
   }
   revalidatePath("/settings/users");
@@ -113,7 +113,12 @@ export async function testIntegrationAction(provider: string): Promise<SettingsR
       try {
         const { Resend } = await import("resend");
         const r = await new Resend(cfg.secret).domains.list();
-        result = r.error ? { ok: false, message: r.error.message } : { ok: true, message: `Connected · ${r.data?.data?.length ?? 0} verified domain(s)` };
+        if (!r.error) result = { ok: true, message: `Connected · ${r.data?.data?.length ?? 0} verified domain(s)` };
+        // A key scoped to "Sending access" only (Resend's recommended least-privilege
+        // scope) can't list domains — that 403 still proves the key itself is valid,
+        // so treat it as a pass. Use "Send test email" below for real proof of delivery.
+        else if (/restricted to only send/i.test(r.error.message)) result = { ok: true, message: "Key is valid — scoped to sending only, so domain lookup is unavailable. Use “Send test email” below to confirm delivery." };
+        else result = { ok: false, message: r.error.message };
       } catch (err) {
         result = { ok: false, message: err instanceof Error ? err.message : String(err) };
       }

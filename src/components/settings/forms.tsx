@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Alert } from "@/components/ui/misc";
@@ -99,6 +99,7 @@ export function IntegrationCard({ i, defaultTestEmail }: { i: IntegrationView; d
   const [state, action, pending] = useActionState<SettingsResult, FormData>(saveIntegrationAction, {});
   const [testState, testAction, testing] = useActionState<SettingsResult, FormData>(() => testIntegrationAction(i.provider), {});
   const [emailState, emailAction, sendingEmail] = useActionState<SettingsResult, FormData>(sendTestEmailAction, {});
+  const [testTo, setTestTo] = useState(defaultTestEmail ?? "");
   const meta = INTEGRATION_META[i.provider];
   return (
     <div className="rounded-card border border-line bg-white shadow-card">
@@ -140,7 +141,7 @@ export function IntegrationCard({ i, defaultTestEmail }: { i: IntegrationView; d
       {i.provider === "resend" ? (
         <form action={emailAction} className="flex flex-wrap items-end gap-3 border-t border-line px-5 py-3">
           <Field label="Send a test email to" htmlFor="resend-test-to" hint="Sends a real message through the current transport — Resend if configured, otherwise the outbox at /dev/mailbox." className="min-w-[240px] flex-1">
-            <Input id="resend-test-to" name="to" type="email" required defaultValue={defaultTestEmail ?? ""} placeholder="you@kacific.com" />
+            <Input id="resend-test-to" name="to" type="email" required value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="you@kacific.com" />
           </Field>
           <Button type="submit" size="sm" variant="secondary" loading={sendingEmail}>Send test email</Button>
           {emailState.error ? <span className="w-full text-[13px] text-bad-fg">{emailState.error}</span> : emailState.ok ? <span className="w-full text-[13px] text-ok-fg">{emailState.message}</span> : null}
