@@ -46,7 +46,7 @@ export const SKU_CATEGORIES = [
   "Tools",
 ] as const;
 
-export const AGENT_KINDS = ["draft_po", "reorder", "invoice_match", "vendor_risk", "chat"] as const;
+export const AGENT_KINDS = ["draft_po", "reorder", "invoice_match", "vendor_risk", "chat", "assistant"] as const;
 export type AgentKind = (typeof AGENT_KINDS)[number];
 
 export const TASK_KINDS = [

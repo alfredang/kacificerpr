@@ -2,12 +2,12 @@ import { z } from "zod";
 import { getDb } from "@/db";
 import { skus } from "@/db/schema";
 import { eq, ilike, or } from "drizzle-orm";
-import { getInvoice, listInvoices } from "@/server/services/invoice";
+import { dueInvoices, getInvoice, listInvoices } from "@/server/services/invoice";
 import { getPo, listPos } from "@/server/services/po";
 import { getSku, listSkus, lowStockList } from "@/server/services/sku";
 import { getVendor, listVendors } from "@/server/services/vendor";
 import { dashboardData } from "@/server/services/dashboard";
-import type { ApiScope } from "@/lib/constants";
+import { INVOICE_STATUSES, PO_STATUSES, type ApiScope } from "@/lib/constants";
 import type { ToolDef } from "@/server/integrations/deepseek";
 
 /* ONE tool registry, three surfaces: the in-app DeepSeek agents, the REST
@@ -87,8 +87,8 @@ export const TOOLS: Tool[] = [
     name: "list_purchase_orders",
     description: "List purchase orders, optionally filtered by status (draft, pending_approval, approved, rejected, ordered, received, closed, cancelled).",
     scope: "read:po",
-    input: z.object({ status: z.string().optional(), limit: z.number().int().min(1).max(100).optional() }),
-    handler: async ({ status, limit }) => (await listPos({ status: status as never, limit: limit ?? 50 })).map((p) => ({ id: p.id, poNumber: p.poNumber, status: p.status, vendor: p.vendor.name, warehouse: p.warehouse.code, requester: p.requester?.name, total: p.total, neededBy: p.neededBy, createdAt: p.createdAt })),
+    input: z.object({ status: z.enum(PO_STATUSES).optional(), limit: z.number().int().min(1).max(100).optional() }),
+    handler: async ({ status, limit }) => (await listPos({ status, limit: limit ?? 50 })).map((p) => ({ id: p.id, poNumber: p.poNumber, status: p.status, vendor: p.vendor.name, warehouse: p.warehouse.code, requester: p.requester?.name, total: p.total, neededBy: p.neededBy, createdAt: p.createdAt })),
   }),
   t({
     name: "get_purchase_order",
@@ -103,10 +103,17 @@ export const TOOLS: Tool[] = [
   }),
   t({
     name: "list_invoices",
-    description: "List vendor invoices, optionally by status.",
+    description: "List vendor invoices, optionally by status (draft, received, matched, approved, paid, disputed).",
     scope: "read:invoices",
-    input: z.object({ status: z.string().optional() }),
-    handler: async ({ status }) => (await listInvoices({ status: status as never })).map((i) => ({ id: i.id, invoiceNumber: i.invoiceNumber, status: i.status, vendor: i.vendor.name, po: i.po?.poNumber, total: i.total, dueAt: i.dueAt, match: i.match })),
+    input: z.object({ status: z.enum(INVOICE_STATUSES).optional() }),
+    handler: async ({ status }) => (await listInvoices({ status })).map((i) => ({ id: i.id, invoiceNumber: i.invoiceNumber, status: i.status, vendor: i.vendor.name, po: i.po?.poNumber, total: i.total, dueAt: i.dueAt, match: i.match })),
+  }),
+  t({
+    name: "list_due_invoices",
+    description: "Invoices due for payment now or within a number of days (status received/matched/approved with a due date on or before the horizon), oldest due first. Use for 'what is payable/pending'.",
+    scope: "read:invoices",
+    input: z.object({ days: z.number().int().min(1).max(90).optional() }),
+    handler: async ({ days }) => (await dueInvoices(days ?? 7)).map((i) => ({ id: i.id, invoiceNumber: i.invoiceNumber, status: i.status, vendor: i.vendor.name, po: i.po?.poNumber, total: i.total, dueAt: i.dueAt, overdue: i.overdue })),
   }),
   t({
     name: "get_invoice",

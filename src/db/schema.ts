@@ -47,8 +47,8 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
 ]);
 export const actorTypeEnum = pgEnum("actor_type", ["user", "api_key", "agent", "system", "token"]);
 export const stockReasonEnum = pgEnum("stock_reason", ["seed", "receipt", "adjustment", "issue", "transfer"]);
-export const agentKindEnum = pgEnum("agent_kind", ["draft_po", "reorder", "invoice_match", "vendor_risk", "chat"]);
-export const chatChannelEnum = pgEnum("chat_channel", ["widget", "telegram"]);
+export const agentKindEnum = pgEnum("agent_kind", ["draft_po", "reorder", "invoice_match", "vendor_risk", "chat", "assistant"]);
+export const chatChannelEnum = pgEnum("chat_channel", ["widget", "telegram", "assistant"]);
 export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "proposed", "applied", "discarded", "failed"]);
 export const integrationProviderEnum = pgEnum("integration_provider", ["resend", "deepseek", "asana", "telegram"]);
 export const tokenPurposeEnum = pgEnum("token_purpose", ["password_reset", "po_approve", "po_reject", "invite"]);

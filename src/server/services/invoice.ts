@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, lte, or } from "drizzle-orm";
 import { getDb } from "@/db";
 import { companySettings, invoiceLines, invoices, purchaseOrders, type Invoice, type User } from "@/db/schema";
 import type { InvoiceStatus } from "@/lib/constants";
@@ -179,4 +179,19 @@ export async function overdueInvoices() {
   const today = new Date().toISOString().slice(0, 10);
   const rows = await listInvoices();
   return rows.filter((i) => ["received", "matched", "approved"].includes(i.status) && i.dueAt && i.dueAt < today);
+}
+
+/* Invoices due for payment now or within `days` (status received/matched/
+   approved with a due date on or before the horizon), oldest due first. */
+export async function dueInvoices(days = 7) {
+  const db = getDb();
+  const today = new Date().toISOString().slice(0, 10);
+  const horizon = new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+  const rows = await db.query.invoices.findMany({
+    where: and(inArray(invoices.status, ["received", "matched", "approved"]), lte(invoices.dueAt, horizon)),
+    with: { vendor: true, po: { columns: { id: true, poNumber: true, status: true, total: true } } },
+    orderBy: [asc(invoices.dueAt)],
+    limit: 200,
+  });
+  return rows.map((i) => ({ ...i, overdue: Boolean(i.dueAt && i.dueAt < today) }));
 }

@@ -7,6 +7,7 @@ import {
   GitBranch,
   LayoutDashboard,
   ListChecks,
+  MessagesSquare,
   Settings,
   ShoppingCart,
   Store,
@@ -26,5 +27,6 @@ export const NAV: NavItem[] = [
   { href: "/timeline", label: "Process timeline", icon: GitBranch, action: "timeline.view" },
   { href: "/asana", label: "Asana", icon: ListChecks, action: "asana.view" },
   { href: "/agents", label: "AI agents", icon: Bot, action: "agents.run" },
+  { href: "/assistant", label: "Data assistant", icon: MessagesSquare, action: "agents.run" },
   { href: "/settings", label: "Settings", icon: Settings, action: "settings.view" },
 ];

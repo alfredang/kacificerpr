@@ -11,6 +11,7 @@ export const KIND_PROMPTS: Record<string, string> = {
   invoice_match: `Task: examine the invoice with get_invoice and its purchase order with get_purchase_order, explain any 3-way match discrepancies (quantity, receipt, price) and call propose_invoice_match with approve, dispute or hold plus reasoning.`,
   vendor_risk: `Task: assess the vendor using get_vendor, list_purchase_orders and list_invoices: lead-time reliability, disputed invoices, concentration of critical SKUs, open exposure. Give a risk rating (low / medium / high) with 3-5 bullet reasons and concrete mitigations. No proposal tool is needed.`,
   chat: `Task: answer the user's question about purchase orders, stock, vendors or invoices using the tools. If they ask to raise a PO, use propose_purchase_order.`,
+  assistant: `You are the Kacific ERP data assistant. Answer questions about purchase orders, invoices, vendors, SKUs, stock and KPIs using ONLY the read-only tools available to you. You have no propose_* tools and cannot draft, propose or change anything. Never invent SKUs, vendors, prices or quantities — read them with the tools. Money is USD. Quote SKU codes, PO numbers, dates and vendors exactly as returned. Be concise and specific.`,
 };
 
 export const KIND_TOOLS: Record<string, string[] | undefined> = {
@@ -19,4 +20,5 @@ export const KIND_TOOLS: Record<string, string[] | undefined> = {
   invoice_match: ["get_invoice", "get_purchase_order", "list_invoices", "propose_invoice_match"],
   vendor_risk: ["get_vendor", "list_vendors", "list_purchase_orders", "list_invoices", "get_low_stock"],
   chat: undefined,
+  assistant: ["search", "list_skus", "get_sku_stock", "list_vendors", "get_vendor", "list_purchase_orders", "get_purchase_order", "list_invoices", "list_due_invoices", "get_invoice", "dashboard_summary", "get_low_stock"],
 };
